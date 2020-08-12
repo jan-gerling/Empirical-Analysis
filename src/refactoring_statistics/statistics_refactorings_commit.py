@@ -34,7 +34,7 @@ def compute_probability(dataframe, divisor, file_addition: str, statistic: Stati
     file_addition
         Store the results in this file.
     """
-    file_path = f"results/Refactorings_{file_addition}.csv"
+    file_path = f"results/Co-occurrence_{file_addition}.csv"
     if not path.exists(file_path):
         #compute the probabilty of a refatoring co-occuring on the same commit
         dataframe_probability = dataframe.div(divisor)
@@ -66,7 +66,7 @@ def filter_probability(dataframe, threshold, labels, file_addition: str):
     file_addition
         Add this to the output file in order to distinguish it, e.g.
     """
-    file_path = f"results/Refactorings_{file_addition}_{threshold:.2f}.csv"
+    file_path = f"results/Co-occurrence/{file_addition}_{threshold:.2f}.csv"
     filtered_rows_matrix, filtered_labels_rows, filtered_labels_columns, drop_columns = [], [], [], []
     #filter all columns
     for name, values in dataframe.iteritems():
@@ -91,7 +91,7 @@ def filter_probability(dataframe, threshold, labels, file_addition: str):
 
 def query_db(table_name: str, entity_name: str, refactorings, statistic = Statistics.likelihood):
     dataframe = pd.DataFrame()
-    file_path = f"results/Refactorings_{table_name}_{statistic}_raw.csv"
+    file_path = f"results/Co-occurrence/{table_name}_{statistic}_raw.csv"
     if not path.exists(file_path):
 
         for refactoring_name in refactorings:
@@ -149,7 +149,7 @@ def co_occurence_commit(refactorings, probability_threshold = 0.0, statistic = S
     im, cbar = heatmap(co_occurrence_matrix, filtered_labels_rows, filtered_labels_columns, ax=ax, cmap="YlGn", cbarlabel=f"Co-occurrence [{statistic} / COMMIT]")
 
     plt.title(f"Co-occurrence of refactoring types on the same commit (min[row | col] > {probability_threshold:.2f})")
-    fig_path = f"results/Refactorings_co-occurrence_commit_{probability_threshold:.2f}_{statistic}_{co_occurrence_matrix.shape}.png"
+    fig_path = f"results/Co-occurrence/commit_{probability_threshold:.2f}_{statistic}_{co_occurrence_matrix.shape}.png"
     plt.savefig(fig_path)
     log(f"Saved figure: Co-occurrence of refactoring types on the same commit (min[row | col] > {probability_threshold:.2f}) to {fig_path}")
 
@@ -186,7 +186,7 @@ def co_occurence_window(refactorings, table_name: str, probability_threshold=0.0
     fig, ax = plt.subplots(figsize=(co_occurrence_matrix.shape[1], co_occurrence_matrix.shape[0]), dpi=120)
     im, cbar = heatmap(co_occurrence_matrix, filtered_labels_rows, filtered_labels_columns, ax=ax, cmap="YlGn", cbarlabel=f"Co-occurrence [{statistic} / WINDOW]")
     plt.title(f"Co-occurrence of refactoring types in the same commit time window of {table_name} (min[row | col] > {probability_threshold:.2f})")
-    fig_path = f"results/Refactorings_co-occurrence_window_{table_name}_{probability_threshold:.2f}_{statistic}_{co_occurrence_matrix.shape}.png"
+    fig_path = f"results/Co-occurrence/window_{table_name}_{probability_threshold:.2f}_{statistic}_{co_occurrence_matrix.shape}.png"
     plt.savefig(fig_path)
     log(f"Saved figure: Co-occurrence of refactoring types in the same commit time window of {table_name} (min[row | col] > {probability_threshold:.2f}) to {fig_path}")
 
@@ -232,7 +232,7 @@ refactorings = ["Change Attribute Type",
                 "Split Parameter",
                 "Split Variable"]
 
-log_init(header=False, config=False)
+log_init()
 log('Begin Statistics')
 start_time = time.time()
 
