@@ -1,0 +1,7 @@
+mysql-connector-python
+pandas
+numpy
+configparser
+joblib
+matplotlib
+scipy
