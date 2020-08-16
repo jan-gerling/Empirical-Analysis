@@ -2,8 +2,7 @@ import matplotlib.pyplot as plt
 import numpy as np
 
 #Copied from https://matplotlib.org/3.1.1/gallery/images_contours_and_fields/image_annotated_heatmap.html#sphx-glr-gallery-images-contours-and-fields-image-annotated-heatmap-py
-def heatmap(data, row_labels, col_labels, ax=None,
-            cbar_kw={}, cbarlabel="", **kwargs):
+def heatmap(data, row_labels, col_labels, ax=None, cbar_kw={}, cbarlabel="", **kwargs):
     """
     Create a heatmap from a numpy array and two lists of labels.
 
@@ -61,3 +60,14 @@ def heatmap(data, row_labels, col_labels, ax=None,
     ax.tick_params(which="minor", bottom=False, left=False)
 
     return im, cbar
+
+
+def plot_errorbar(x_label, mean, error, errortype:str, descriptor: str):
+    fig, ax = plt.subplots()
+    ax.errorbar(x_label, mean, error, linestyle='None', fmt='o')
+    plt.ylabel(f"Refactoring count")
+    plt.xlabel("Refactoring types")
+    plt.title(f"Mean and {errortype} for {descriptor}")
+    plt.ylim(ymin=1)
+    fig_path = f"results/Aggregate/{descriptor}_mean_{errortype}.png"
+    plt.savefig(fig_path)

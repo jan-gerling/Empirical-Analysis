@@ -1,24 +1,12 @@
-from enum import Enum
-
 import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
-from db.DBConnector import execute_query
 from refactoring_statistics.plot_utils import heatmap
+from refactoring_statistics.query_utils import query_co_occurrence, Statistics
 from utils.log import log_init, log_close, log
 import time
 from os import path
 
-
-class Statistics(Enum):
-    """
-    1. "likelihood": total sum of windows in which a refactoring type occurs
-            and divide it by the total window count in which the current refactoring type occurs
-    2. "frequency": total sum of the occurrences in a window of a refactoring
-            divided by the total window count in which the current refactoring type occurs
-    """
-    likelihood = 1
-    frequency = 2
 
 
 def compute_probability(dataframe, divisor, file_addition: str, statistic: Statistics = Statistics.likelihood):
@@ -89,36 +77,6 @@ def filter_probability(dataframe, threshold, labels, file_addition: str):
     return co_occurrence_matrix, filtered_labels_rows, filtered_labels_columns
 
 
-def query_db(table_name: str, entity_name: str, refactorings, statistic = Statistics.likelihood):
-    dataframe = pd.DataFrame()
-    file_path = f"results/Co-occurrence/{table_name}_{statistic}_raw.csv"
-    if not path.exists(file_path):
-
-        for refactoring_name in refactorings:
-            query = "SELECT "
-            if statistic == Statistics.likelihood:
-                query += ", ".join([f"SUM(IF(`{refactoring_type}` > 0, 1, 0)) AS `{refactoring_type}`" for refactoring_type in refactorings])
-            elif statistic == Statistics.frequency:
-                query += ", ".join([f"SUM(`{refactoring_type}`) AS `{refactoring_type}`" for refactoring_type in refactorings])
-
-            query += f",COUNT(*) AS `{entity_name} Count Total` "
-            query += f"FROM {table_name} WHERE `{refactoring_name}` > 0"
-            refactoringspercommit = execute_query(query)
-            refactoringspercommit["Refactoring Type"] = refactoring_name
-            dataframe = pd.concat([dataframe, refactoringspercommit])
-        #store the dataframe to have the raw data
-        dataframe.to_csv(file_path, index=False)
-        log(f"Got the raw data from Refactorings_window_{table_name} and stored it in: {file_path}.")
-    else:
-        dataframe = pd.read_csv(file_path)
-
-    # extract the labels for the plot and remove un-plotted data
-    labels = dataframe["Refactoring Type"].values
-    count = dataframe[f"{entity_name} Count Total"].values
-    dataframe = dataframe.drop(["Refactoring Type", f"{entity_name} Count Total"], axis=1)
-    return dataframe, labels, count
-
-
 def co_occurence_commit(refactorings, probability_threshold = 0.0, statistic = Statistics.likelihood):
     """
     Computes the occurrence probability of refactorings occurring on the same commit.
@@ -136,7 +94,7 @@ def co_occurence_commit(refactorings, probability_threshold = 0.0, statistic = S
         the probability of a at least one value in a row or column has to be higher, for it to appear in the plot
     """
     #get the raw data
-    dataframe, labels, commit_count = query_db("refactoringspercommit", "Window", refactorings, statistic)
+    dataframe, labels, commit_count = query_co_occurrence("refactoringspercommit", "Window", refactorings, statistic)
 
     #compute the probabilities
     dataframe_probability = compute_probability(dataframe, commit_count, "commit")
@@ -174,7 +132,7 @@ def co_occurence_window(refactorings, table_name: str, probability_threshold=0.0
     statistic
         How to compute the likelihood to occur of the of the refactoring.
     """
-    dataframe, labels, window_count = query_db(f"RefactoringsWindow_{table_name}", "Window", refactorings, statistic)
+    dataframe, labels, window_count = query_co_occurrence(f"RefactoringsWindow_{table_name}", "Window", refactorings, statistic)
 
     #compute the probabilities
     dataframe_probability = compute_probability(dataframe, window_count, f"window_{table_name}_{statistic}", statistic)

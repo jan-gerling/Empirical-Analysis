@@ -4,17 +4,35 @@ import hashlib
 import os.path
 import configparser
 from utils.log import log
+import sshtunnel
 
 config = configparser.ConfigParser()
-config.read("../../dbconfig.ini")
+config.read('../dbconfig.ini')
 
-mydb = mysql.connector.connect(
-    host=config['db']["host"],
-    user=config['db']["user"],
-    passwd=config['db']["pwd"],
-    database=config['db']["database"]
-)
-
+# connect to the mysql database either via ssh tunnel or directly
+mydb, tunnel = None, None
+if config["db"].getboolean("use_tunnel"):
+    tunnel = sshtunnel.SSHTunnelForwarder(
+            (config["ssh_tunnel"]["host"],  int(config["ssh_tunnel"]["port"])),
+            ssh_username=config["ssh_tunnel"]["user"],
+            ssh_password=config["ssh_tunnel"]["pwd"],
+            remote_bind_address=(config["db"]["host"], int(config["db"]["port"]))
+    )
+    tunnel.start()
+    mydb = mysql.connector.connect(
+            user=config["db"]["user"],
+            password=config["db"]["pwd"],
+            host="127.0.0.1",
+            port=tunnel.local_bind_port,
+            database=config["db"]["database"],
+        )
+else:
+    mydb = mysql.connector.connect(
+        host=config['db']["host"],
+        user=config['db']["user"],
+        passwd=config['db']["pwd"],
+        database=config['db']["database"]
+    )
 
 # this method executes the query and stores the result in a local cache.
 # we do not want to re-execute large queries.
@@ -37,7 +55,7 @@ def execute_query(sql_query):
     query_hash = hashlib.sha1(sql_query.encode()).hexdigest()
 
     # Create the filepath
-    file_path = os.path.join("_cache", "{}.csv".format(query_hash))
+    file_path = os.path.join("_cache","{}.csv".format(query_hash))
 
     # Read the file or execute query
     if os.path.exists(file_path):
@@ -48,8 +66,15 @@ def execute_query(sql_query):
         try:
             df_raw = pd.read_sql(sql_query, con=mydb)
         except (KeyboardInterrupt, SystemExit):
-            mydb.close()
+            close_connection()
         if not os.path.isdir("_cache"):
             os.makedirs("_cache")
         df_raw.to_csv(file_path, index=False)
         return df_raw
+
+
+def close_connection():
+    if tunnel is not None:
+        tunnel.close()
+    if mydb is not None:
+        mydb.close()
