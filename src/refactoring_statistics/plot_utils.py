@@ -81,7 +81,7 @@ def plot_errorbar(x_label, mean, error, errortype:str, descriptor: str):
 def box_plot(data, label, title, fig_path, scale: str = "log", yticks=[]):
     fig, ax = plt.subplots()
     ax.set_title(f"{title}")
-    ax.boxplot(data, showmeans=True, meanline=True, showfliers=False, notch=True, patch_artist=True)
+    ax.boxplot(data, showmeans=True, showfliers=False, notch=True, patch_artist=True)
     plt.xticks(np.arange(1, len(label) + 1), label, rotation=30)
     plt.yscale(scale)
     if len(yticks) > 0:
@@ -96,7 +96,8 @@ def box_plot(data, label, title, fig_path, scale: str = "log", yticks=[]):
 def box_plot_seaborn(data, title, fig_path, scale: str, yticks=[], figsize=(22, 16)):
     sns.set(style="darkgrid")
     plt.figure(figsize=figsize)
-    sns_plot = sns.boxplot(x="Metric", y="values", hue="Instances", data=data, showfliers=False)
+    sns_plot = sns.boxplot(x="Metric", y="values", hue="Instances", data=data, showfliers=False, showmeans=True,
+                           meanprops={"marker":"o", "markerfacecolor":"white", "markeredgecolor":"black", "markersize":"18"})
     sns_plot.set_title(title, fontsize=26)
     plt.xticks(fontsize=18, rotation=30)
     plt.yscale(scale)
