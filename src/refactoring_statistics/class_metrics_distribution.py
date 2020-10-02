@@ -75,20 +75,19 @@ start_time = time.time()
 
 Path(path.dirname(f"results/Distribution/Class_Metrics/")).mkdir(parents=True, exist_ok=True)
 
-y_ticks = [0.1, 1, 10, 50, 100]
-class_metrics_levels_refactoring("", "Distribution/Class_Metrics", yticks=y_ticks, metrics=CLASS_ATTRIBUTES_QTY_Fields,
-                                 title="Class Attributes: Refactoring Levels",
-                                 file_descriptor="Refactoring_ClassAttributes")
+class_metrics_levels_refactoring("", "Distribution/Class_Metrics", yticks=[0.1, 1, 10, 50, 100], metrics=CLASS_ATTRIBUTES_QTY_Fields,
+                                  title="Class Attributes: Refactoring Levels",
+                                  file_descriptor="Refactoring_ClassAttributes")
 
-class_metrics_levels_refactoring("", "Distribution/Class_Metrics", yticks=y_ticks, metrics=CLASS_METRICS_Fields,
+class_metrics_levels_refactoring("", "Distribution/Class_Metrics", yticks=[0.1, 1, 10, 50, 100, 500, 1000], metrics=CLASS_METRICS_Fields,
                                  title="Class Metrics: Refactoring Levels",
                                  file_descriptor="Refactoring_ClassMetrics")
 
-class_metrics_levels_stable("", "Distribution/Class_Metrics", yticks=y_ticks, metrics=CLASS_ATTRIBUTES_QTY_Fields,
+class_metrics_levels_stable("", "Distribution/Class_Metrics", yticks=[0.1, 1, 10, 50, 100, 500, 1000], metrics=CLASS_ATTRIBUTES_QTY_Fields,
                             title="Class Attributes: Stable Instances Levels",
                             file_descriptor="Stable_ClassAttributes")
 
-class_metrics_levels_stable("", "Distribution/Class_Metrics", yticks=y_ticks, metrics=CLASS_METRICS_Fields,
+class_metrics_levels_stable("", "Distribution/Class_Metrics", yticks=[0.1, 1, 10, 50, 100], metrics=CLASS_METRICS_Fields,
                             title="Class Metrics: Stable Instances Levels",
                             file_descriptor="Stable_ClassMetrics")
 

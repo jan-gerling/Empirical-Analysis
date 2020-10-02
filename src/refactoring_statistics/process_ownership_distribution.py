@@ -26,7 +26,6 @@ OWNERSHIP_METRICS_FIELDS = ["authorOwnership",
                             # "qtyMinorAuthors",
                             "qtyOfAuthors"]
 
-
 def process_metrics_levels(dataset, save_dir, yticks, metrics, title, file_descriptor):
     combined_refactoring_metrics = pd.DataFrame()
     # refactoring metrics per level
