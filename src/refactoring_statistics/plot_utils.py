@@ -1,7 +1,10 @@
 import matplotlib.pyplot as plt
 import numpy as np
-
 #Copied from https://matplotlib.org/3.1.1/gallery/images_contours_and_fields/image_annotated_heatmap.html#sphx-glr-gallery-images-contours-and-fields-image-annotated-heatmap-py
+from utils.log import log
+import seaborn as sns
+
+
 def heatmap(data, row_labels, col_labels, ax=None, cbar_kw={}, cbarlabel="", **kwargs):
     """
     Create a heatmap from a numpy array and two lists of labels.
@@ -68,6 +71,39 @@ def plot_errorbar(x_label, mean, error, errortype:str, descriptor: str):
     plt.ylabel(f"Refactoring count")
     plt.xlabel("Refactoring types")
     plt.title(f"Mean and {errortype} for {descriptor}")
+
     plt.ylim(ymin=1)
-    fig_path = f"results/Aggregate/{descriptor}_mean_{errortype}.png"
+    fig_path = f"results/Aggregate/{descriptor}_mean_{errortype}.svg"
     plt.savefig(fig_path)
+    plt.close(fig)
+
+
+def box_plot(data, label, title, fig_path, scale: str = "log", yticks=[]):
+    fig, ax = plt.subplots()
+    ax.set_title(f"{title}")
+    ax.boxplot(data, showmeans=True, meanline=True, showfliers=False, notch=True, patch_artist=True)
+    plt.xticks(np.arange(1, len(label) + 1), label, rotation=30)
+    plt.yscale(scale)
+    if len(yticks) > 0:
+        ax.set_yticks(yticks)
+    plt.xlabel("Metrics")
+    # plt.legend()
+    plt.savefig(fig_path)
+    log(f"Saved box plot to {fig_path}")
+    plt.close(fig)
+
+
+def box_plot_seaborn(data, title, fig_path, scale: str, yticks=[], figsize=(22, 16)):
+    sns.set(style="darkgrid")
+    plt.figure(figsize=figsize)
+    sns_plot = sns.boxplot(x="Metric", y="values", hue="Instances", data=data, showfliers=False)
+    sns_plot.set_title(title, fontsize=26)
+    plt.xticks(fontsize=18, rotation=30)
+    plt.yscale(scale)
+    sns_plot.set_xlabel("", fontsize=0)
+    sns_plot.set_ylabel("", fontsize=0)
+    plt.yticks(yticks, fontsize=18)
+    plt.legend(bbox_to_anchor=(1, 1), loc=1, borderaxespad=0., fontsize=22)
+    plt.savefig(f"{fig_path}")
+    plt.close()
+    log(f"--Saved box plot to {fig_path}")

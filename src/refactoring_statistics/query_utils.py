@@ -1,9 +1,13 @@
 from enum import Enum
+
+from configs import CACHE_DIR_PATH
 from db.DBConnector import execute_query
+from db.QueryBuilder import get_level_stable, get_level_refactorings
 from utils.log import log
 from os import path
 import pandas as pd
 from pathlib import Path
+import hashlib
 
 
 class Statistics(Enum):
@@ -54,21 +58,33 @@ def query_aggregate(table_name: str, function: str, refactorings, descriptor: st
     return dataframe, labels
 
 
-def query_evolution(table_name: str, count: str, aggregated: bool, refactorings = None, level = None):
+def query_evolution(table_name: str, count: str, aggregated: bool, refactorings):
     data = []
     for refactoring_name in refactorings:
-        if not aggregated and
-            if refactorings is not None:
-                query = f"SELECT {count} FROM {table_name} WHERE refactoring LIKE \"{refactoring_name}\""
-            elif not aggregated and refactorings is None and level is not None:
-                query = f"SELECT {count} FROM {table_name} INNER JOIN RefactoringCommit WHERE refactoring LIKE \"{refactoring_name}\""
+        if not aggregated:
+            query = f"SELECT {count} FROM {table_name} WHERE refactoring LIKE \"{refactoring_name}\""
             commit_count = execute_query(query)
-        elif aggregated and refactorings is not None:
+        else:
             query = f"SELECT {count}, COUNT({count}) AS \"refactoring_count\" FROM {table_name} WHERE refactoring LIKE \"{refactoring_name}\" GROUP BY {count}"
             commit_count = execute_query(query)
             commit_count[f"{count}_total"] = sum(commit_count["refactoring_count"])
         data.append(commit_count)
     log(f"Got {count} from {table_name} for these refactorings: {refactorings}.")
+    return data
+
+
+def query_evolution_level(table_name: str, count: str, aggregated: bool, levels):
+    data = []
+    for level in levels:
+        if not aggregated:
+            query = f"SELECT {count} FROM {table_name} WHERE refactoring_level = {level}"
+            commit_count = execute_query(query)
+        else:
+            query = f"SELECT {count}, COUNT({count}) AS \"refactoring_count\" FROM {table_name} WHERE refactoring_level = {level} GROUP BY {count}"
+            commit_count = execute_query(query)
+            commit_count[f"{count}_total"] = sum(commit_count["refactoring_count"])
+        data.append(commit_count)
+    log(f"Got {count} from {table_name} for these level: {levels}.")
     return data
 
 
@@ -100,3 +116,41 @@ def query_co_occurrence(table_name: str, entity_name: str, refactorings, statist
     count = dataframe[f"{entity_name} Count Total"].values
     dataframe = dataframe.drop(["Refactoring Type", f"{entity_name} Count Total"], axis=1)
     return dataframe, labels, count
+
+
+def get_metrics_refactoring_level(level, dataset, refactorings,  metrics, samples=-1):
+    combined_refactoring_metrics = pd.DataFrame()
+    for refactoring_name in refactorings:
+        metric_data = retrieve_columns(get_level_refactorings(int(level), refactoring_name, dataset), metrics, samples)
+        combined_refactoring_metrics = combined_refactoring_metrics.append(metric_data)
+    log(f"Extracted refactorings metrics of level {level}")
+    return combined_refactoring_metrics
+
+
+def get_metrics_stable_level(level, k, dataset, metrics, samples=-1):
+    metric_data = retrieve_columns(get_level_stable(int(level), k, dataset), metrics, samples)
+    log(f"Extracted metrics of level {level} for K={k}")
+    return metric_data
+
+
+def get_metrics_stable_all(k, dataset, levels, metrics, samples=-1):
+    combined_stable_metrics = pd.DataFrame()
+    for level in levels:
+        metric_data = get_metrics_stable_level(level, k, dataset, metrics, samples)
+        combined_stable_metrics = combined_stable_metrics.append(metric_data)
+    return combined_stable_metrics
+
+
+def retrieve_columns(sql_query, columns, samples=-1):
+    # Hash the query
+    query_hash = hashlib.sha1(sql_query.encode()).hexdigest()
+
+    # Create the filepath
+    cache_dir = path.join(CACHE_DIR_PATH, "_cache")
+    file_path = path.join(cache_dir, f"{query_hash}.csv")
+
+    data = pd.read_csv(file_path, usecols=columns).apply(pd.to_numeric, downcast='float')
+    if samples < 0 or len(data) < samples:
+        return data
+    else:
+        return data.sample(samples)

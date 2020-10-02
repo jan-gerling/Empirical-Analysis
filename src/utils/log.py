@@ -36,7 +36,7 @@ def log_init(log_name: str = ""):
     log(r"                                                             |___/ ")
     log("")
 
-    print_config()
+    #print_config()
 
 
 def log_close():

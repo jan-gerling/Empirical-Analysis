@@ -41,7 +41,7 @@ def compute_probability(dataframe, divisor, file_addition: str, statistic: Stati
 
 def filter_probability(dataframe, threshold, labels, file_addition: str):
     """
-    Filter the rows and columns of this dataframe to have at least the specified likelihhod.
+    Filter the rows and columns of this dataframe to have at least the specified likelihood.
 
     Parameters
     ----------
