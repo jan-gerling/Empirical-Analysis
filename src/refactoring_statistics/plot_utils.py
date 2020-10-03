@@ -93,10 +93,10 @@ def box_plot(data, label, title, fig_path, scale: str = "log", yticks=[]):
     plt.close(fig)
 
 
-def box_plot_seaborn(data, title, fig_path, scale: str, yticks=[], figsize=(22, 16)):
+def box_plot_seaborn(data, title, fig_path, scale: str, yticks=[], figsize=(22, 16), hue="Instances"):
     sns.set(style="darkgrid")
     plt.figure(figsize=figsize)
-    sns_plot = sns.boxplot(x="Metric", y="values", hue="Instances", data=data, showfliers=False, showmeans=True,
+    sns_plot = sns.boxplot(x="Metric", y="values", hue=hue, data=data, showfliers=False, showmeans=True,
                            meanprops={"marker":"o", "markerfacecolor":"white", "markeredgecolor":"black", "markersize":"18"})
     sns_plot.set_title(title, fontsize=26)
     plt.xticks(fontsize=18, rotation=30)

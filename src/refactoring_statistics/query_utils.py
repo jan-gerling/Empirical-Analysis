@@ -127,6 +127,16 @@ def get_metrics_refactoring_level(level, dataset, refactorings,  metrics, sample
     return combined_refactoring_metrics
 
 
+def get_metrics_refactorings(level, dataset, refactorings,  metrics, samples=-1):
+    combined_refactoring_metrics = pd.DataFrame()
+    for refactoring_name in refactorings:
+        metric_data = retrieve_columns(get_level_refactorings(int(level), refactoring_name, dataset), metrics, samples)
+        metric_data['refactoring'] = refactoring_name
+        combined_refactoring_metrics = combined_refactoring_metrics.append(metric_data)
+    log(f"Extracted refactorings metrics of level {level}")
+    return combined_refactoring_metrics
+
+
 def get_metrics_stable_level(level, k, dataset, metrics, samples=-1):
     metric_data = retrieve_columns(get_level_stable(int(level), k, dataset), metrics, samples)
     log(f"Extracted metrics of level {level} for K={k}")
