@@ -172,7 +172,7 @@ metrics_stable_levels(DATASET, "Distribution/Class_Metrics/Stable", yticks=[0.1,
                       file_descriptor="Class_Metrics_Stable")
 
 # process metrics all levels
-Path(path.dirname("results/Distribution/PO_Metrics/Levels")).mkdir(parents=True, exist_ok=True)
+Path(path.dirname("results/Distribution/PO_Metrics/Levels/")).mkdir(parents=True, exist_ok=True)
 process_metrics_levels(DATASET, "Distribution/PO_Metrics/Levels", yticks=[0.1, 1, 10], metrics=OWNERSHIP_METRICS_FIELDS,
                        title="Ownership Metrics: Refactorings vs Stable Instances",
                        file_descriptor="Ownership_Metrics")
