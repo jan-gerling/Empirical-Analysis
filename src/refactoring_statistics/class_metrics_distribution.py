@@ -33,7 +33,8 @@ CLASS_METRICS_Fields = ["classCbo",
 # also relevant attributes for variable level refactorings arenumber of string literals in a class, number of variables in the method, "number of public fields in a class", number of variables in a class
 CLASS_ATTRIBUTES_QTY_Fields = ["classLoc", "classUniqueWordsQty", "classNumberOfMethods", "classStringLiteralsQty", "classNumberOfPublicFields", "classVariablesQty"]
 
-PROCESS_METRICS_FIELDS = ["authorOwnership",
+
+PROCESS_METRICS_FIELDS = ["qtyOfCommits",
                           "bugFixCount",
                           "refactoringsInvolved"]
 
