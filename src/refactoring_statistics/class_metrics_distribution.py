@@ -132,52 +132,52 @@ start_time = time.time()
 
 # class metrics individual refactorings
 Path(path.dirname("results/Distribution/Class_Metrics/Refactorings/")).mkdir(parents=True, exist_ok=True)
-metrics_refactorings_individual_levels(DATASET, "Distribution/Class_Metrics/Refactorings", yticks=[0.1, 1, 10, 50, 100], metrics=CLASS_ATTRIBUTES_QTY_Fields,
+metrics_refactorings_individual_levels(DATASET, "Distribution/Class_Metrics/Refactorings", yticks=[1, 10, 25, 50, 100], metrics=CLASS_ATTRIBUTES_QTY_Fields,
                                        title="Class Attributes: Refactorings",
                                        file_descriptor="Class_Attributes")
 
-metrics_refactorings_individual_levels(DATASET, "Distribution/Class_Metrics/Refactorings", yticks=[0.1, 1, 10, 50, 100, 500, 1000], metrics=CLASS_METRICS_Fields,
+metrics_refactorings_individual_levels(DATASET, "Distribution/Class_Metrics/Refactorings", yticks=[10, 50, 100, 500, 1000], metrics=CLASS_METRICS_Fields,
                                        title="Class Metrics: Refactorings",
                                        file_descriptor="Class_Metrics")
 
 
 # process and ownership metrics individual refactorings
 Path(path.dirname("results/Distribution/PO_Metrics/Refactorings/")).mkdir(parents=True, exist_ok=True)
-metrics_refactorings_individual_levels(DATASET, "Distribution/PO_Metrics/Refactorings", yticks=[0.1, 1, 10], metrics=OWNERSHIP_METRICS_FIELDS,
+metrics_refactorings_individual_levels(DATASET, "Distribution/PO_Metrics/Refactorings", yticks=[0.1, 0.5, 1, 5, 10], metrics=OWNERSHIP_METRICS_FIELDS,
                                        title="Ownership Metrics: Refactorings",
                                        file_descriptor="Ownership_Metrics")
 
-metrics_refactorings_individual_levels(DATASET, "Distribution/PO_Metrics/Refactorings", yticks=[1, 10, 50, 100], metrics=PROCESS_METRICS_FIELDS,
+metrics_refactorings_individual_levels(DATASET, "Distribution/PO_Metrics/Refactorings", yticks=[1, 10, 25, 50, 100], metrics=PROCESS_METRICS_FIELDS,
                                        title="Process Metrics: Refactorings",
                                        file_descriptor="Process_Metrics")
 
 # class metrics refactoring levels
 Path(path.dirname("results/Distribution/Class_Metrics/Refactoring/")).mkdir(parents=True, exist_ok=True)
-metrics_refactoring_levels(DATASET, "Distribution/Class_Metrics/Refactoring", yticks=[0.1, 1, 10, 50, 100], metrics=CLASS_ATTRIBUTES_QTY_Fields,
+metrics_refactoring_levels(DATASET, "Distribution/Class_Metrics/Refactoring", yticks=[1, 10, 25, 50, 100], metrics=CLASS_ATTRIBUTES_QTY_Fields,
                            title="Class Attributes: Refactoring Levels",
                            file_descriptor="Class_Attributes_Refactoring")
 
-metrics_refactoring_levels(DATASET, "Distribution/Class_Metrics/Refactoring", yticks=[0.1, 1, 10, 50, 100, 500, 1000], metrics=CLASS_METRICS_Fields,
+metrics_refactoring_levels(DATASET, "Distribution/Class_Metrics/Refactoring", yticks=[1, 10, 25, 50, 100, 500, 1000], metrics=CLASS_METRICS_Fields,
                            title="Class Metrics: Refactoring Levels",
                            file_descriptor="Class_Metrics_Refactoring")
 
 # class metrics stable levels
 Path(path.dirname("results/Distribution/Class_Metrics/Stable/")).mkdir(parents=True, exist_ok=True)
-metrics_stable_levels(DATASET, "Distribution/Class_Metrics/Stable", yticks=[0.1, 1, 10, 50, 100, 500, 1000], metrics=CLASS_ATTRIBUTES_QTY_Fields,
+metrics_stable_levels(DATASET, "Distribution/Class_Metrics/Stable", yticks=[1, 10, 25, 50, 100, 500, 1000], metrics=CLASS_ATTRIBUTES_QTY_Fields,
                       title="Class Attributes: Stable Instances Levels",
                       file_descriptor="Class_Attributes_Stable")
 
-metrics_stable_levels(DATASET, "Distribution/Class_Metrics/Stable", yticks=[0.1, 1, 10, 50, 100], metrics=CLASS_METRICS_Fields,
+metrics_stable_levels(DATASET, "Distribution/Class_Metrics/Stable", yticks=[1, 10, 25, 50, 100, 500, 1000], metrics=CLASS_METRICS_Fields,
                       title="Class Metrics: Stable Instances Levels",
                       file_descriptor="Class_Metrics_Stable")
 
 # process metrics all levels
 Path(path.dirname("results/Distribution/PO_Metrics/Levels/")).mkdir(parents=True, exist_ok=True)
-process_metrics_levels(DATASET, "Distribution/PO_Metrics/Levels", yticks=[0.1, 1, 10], metrics=OWNERSHIP_METRICS_FIELDS,
+process_metrics_levels(DATASET, "Distribution/PO_Metrics/Levels", yticks=[0.1, 0.5, 1, 5, 10], metrics=OWNERSHIP_METRICS_FIELDS,
                        title="Ownership Metrics: Refactorings vs Stable Instances",
                        file_descriptor="Ownership_Metrics")
 
-process_metrics_levels(DATASET, "Distribution/PO_Metrics/Levels", yticks=[1, 10, 50, 100], metrics=PROCESS_METRICS_FIELDS,
+process_metrics_levels(DATASET, "Distribution/PO_Metrics/Levels", yticks=[1, 10, 25, 50, 100], metrics=PROCESS_METRICS_FIELDS,
                        title="Process Metrics: Refactorings vs Stable Instances",
                        file_descriptor="Process_Metrics")
 

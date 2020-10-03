@@ -104,6 +104,7 @@ def box_plot_seaborn(data, title, fig_path, scale: str, yticks=[], figsize=(22, 
     sns_plot.set_xlabel("", fontsize=0)
     sns_plot.set_ylabel("", fontsize=0)
     plt.yticks(yticks, fontsize=18)
+    sns_plot.set_yticklabels(["$%.1f$" % y for y in yticks], fontsize=18);
     plt.legend(bbox_to_anchor=(1, 1), loc=1, borderaxespad=0., fontsize=22)
     plt.savefig(f"{fig_path}")
     plt.close()
