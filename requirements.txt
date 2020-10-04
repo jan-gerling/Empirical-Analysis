@@ -5,3 +5,4 @@ configparser
 joblib
 matplotlib
 scipy
+openpyxl
