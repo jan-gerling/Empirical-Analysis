@@ -1,6 +1,6 @@
 from configs import Level, LEVEL_MAP
 from db.DBConnector import close_connection
-from refactoring_statistics.plot_utils import box_plot_seaborn
+from refactoring_statistics.plot_utils import box_plot_seaborn, line_plot_seaborn
 from refactoring_statistics.query_utils import get_metrics_refactoring_level, get_metrics_stable_level, \
     get_metrics_refactorings, get_metrics_stable_all
 from utils.log import log_init, log_close, log
@@ -15,7 +15,7 @@ REFACTORING_SAMPLES = 50000
 STABLE_SAMPLES = 50000
 REFACTORING_LEVELS = [Level.Class, Level.Method, Level.Variable, Level.Field, Level.Other]
 STABLE_LEVELS = [Level.Class, Level.Method, Level.Variable, Level.Field]
-STABLE_Ks = [15, 20, 25, 30, 35, 40, 45, 50, 60, 70, 80, 90, 100]
+STABLE_Ks = [15, 20, 25, 30, 35, 40, 45, 50, 50, 60, 70, 80, 90, 100]
 IMG_FORMAT = "svg"
 DATASET = ""
 
@@ -127,6 +127,22 @@ def process_metrics_levels(dataset, save_dir, yticks, metrics, title, file_descr
             log(f"--Skipped plot at {fig_path_box}, because it already exists.")
 
 
+def process_stable_k(dataset, save_dir, metrics, yticks, title, file_descriptor):
+    # stable metrics for all level and k
+    fig_path_box = f"results/{save_dir}/{file_descriptor}_line_plot_{dataset}.{IMG_FORMAT}"
+    if not path.exists(fig_path_box):
+        combined_stable_metrics = pd.DataFrame()
+        for k in STABLE_Ks:
+            stable_metrics = get_metrics_stable_all(k, dataset, STABLE_LEVELS, metrics, samples=STABLE_SAMPLES)
+            stable_metrics['K'] = k
+            stable_metrics = pd.melt(stable_metrics, id_vars="K", var_name="Metric", value_vars=metrics, value_name="values")
+            combined_stable_metrics = combined_stable_metrics.append(stable_metrics)
+        # plot
+        line_plot_seaborn(combined_stable_metrics, title, fig_path_box, yticks=yticks, scale="log")
+    else:
+        log(f"--Skipped plot at {fig_path_box}, because it already exists.")
+
+
 log_init(f"results/Distribution/class_metrics_distribution_{datetime.datetime.now().strftime('%Y-%m-%d-%H-%M-%S')}.txt")
 start_time = time.time()
 
@@ -139,7 +155,6 @@ metrics_refactorings_individual_levels(DATASET, "Distribution/Class_Metrics/Refa
 metrics_refactorings_individual_levels(DATASET, "Distribution/Class_Metrics/Refactorings", yticks=[10, 50, 100, 500, 1000], metrics=CLASS_METRICS_Fields,
                                        title="Class Metrics: Refactorings",
                                        file_descriptor="Class_Metrics")
-
 
 # process and ownership metrics individual refactorings
 Path(path.dirname("results/Distribution/PO_Metrics/Refactorings/")).mkdir(parents=True, exist_ok=True)
@@ -180,6 +195,16 @@ process_metrics_levels(DATASET, "Distribution/PO_Metrics/Levels", yticks=[0.1, 0
 process_metrics_levels(DATASET, "Distribution/PO_Metrics/Levels", yticks=[1, 10, 25, 50, 100], metrics=PROCESS_METRICS_FIELDS,
                        title="Process Metrics: Refactorings vs Stable Instances",
                        file_descriptor="Process_Metrics")
+
+# process- and ownership metrics stable for k's (line plot)
+Path(path.dirname("results/Distribution/PO_Metrics/K/")).mkdir(parents=True, exist_ok=True)
+process_stable_k(DATASET, "Distribution/PO_Metrics/K", metrics=OWNERSHIP_METRICS_FIELDS, yticks=[0.1, 0.5, 1, 5, 10],
+                 title="Ownership Metrics: Stable K's",
+                 file_descriptor="Ownership_Metrics")
+
+process_stable_k(DATASET, "Distribution/PO_Metrics/K", metrics=PROCESS_METRICS_FIELDS, yticks=[1, 10, 25, 50, 100],
+                 title="Process Metrics: Stable K's",
+                 file_descriptor="Process_Metrics")
 
 log('Generating Statistics took %s seconds.' % (time.time() - start_time))
 log_close()
