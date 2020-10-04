@@ -15,7 +15,7 @@ REFACTORING_SAMPLES = 50000
 STABLE_SAMPLES = 50000
 REFACTORING_LEVELS = [Level.Class, Level.Method, Level.Variable, Level.Field, Level.Other]
 STABLE_LEVELS = [Level.Class, Level.Method, Level.Variable, Level.Field]
-STABLE_Ks = [15, 20, 25, 30, 35, 40, 45, 50, 50, 60, 70, 80, 90, 100]
+STABLE_Ks = [15, 20, 25, 30, 35, 40, 45, 50, 60, 70, 80, 90, 100]
 IMG_FORMAT = "svg"
 DATASET = ""
 
@@ -32,7 +32,6 @@ CLASS_METRICS_Fields = ["classCbo",
 # also relevant attributes for method level refactorings are "classNumberOfMethods", number of unique words in a class, classLOC
 # also relevant attributes for variable level refactorings arenumber of string literals in a class, number of variables in the method, "number of public fields in a class", number of variables in a class
 CLASS_ATTRIBUTES_QTY_Fields = ["classLoc", "classUniqueWordsQty", "classNumberOfMethods", "classStringLiteralsQty", "classNumberOfPublicFields", "classVariablesQty"]
-
 
 PROCESS_METRICS_FIELDS = ["qtyOfCommits",
                           "bugFixCount",
@@ -138,7 +137,7 @@ def process_stable_k(dataset, save_dir, metrics, yticks, title, file_descriptor)
             stable_metrics = pd.melt(stable_metrics, id_vars="K", var_name="Metric", value_vars=metrics, value_name="values")
             combined_stable_metrics = combined_stable_metrics.append(stable_metrics)
         # plot
-        line_plot_seaborn(combined_stable_metrics, title, fig_path_box, yticks=yticks, scale="log")
+        line_plot_seaborn(combined_stable_metrics, title, fig_path_box, xticks=STABLE_Ks, yticks=yticks, scale="log")
     else:
         log(f"--Skipped plot at {fig_path_box}, because it already exists.")
 

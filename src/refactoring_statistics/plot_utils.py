@@ -111,7 +111,7 @@ def box_plot_seaborn(data, title, fig_path, scale: str, yticks=[], figsize=(22, 
     log(f"--Saved box plot to {fig_path}")
 
 
-def line_plot_seaborn(data, title, fig_path, scale: str = "linear", yticks=[], figsize=(22, 16), hue="Metric"):
+def line_plot_seaborn(data, title, fig_path, scale: str = "linear", xticks=[], yticks=[], figsize=(22, 16), hue="Metric"):
     sns.set(style="darkgrid")
     plt.figure(figsize=figsize)
     sns_plot = sns.lineplot(x="K", y="values", hue=hue, data=data)
@@ -121,7 +121,8 @@ def line_plot_seaborn(data, title, fig_path, scale: str = "linear", yticks=[], f
     plt.yscale(scale)
     plt.yticks(yticks, fontsize=18)
     sns_plot.set_yticklabels(["$%.1f$" % y for y in yticks], fontsize=18)
-    plt.xticks(fontsize=18)
+    plt.xticks(xticks, fontsize=18)
+    sns_plot.set_xticklabels(["$%i$" % x for x in xticks], fontsize=18)
     plt.legend(bbox_to_anchor=(1, 1), loc=1, borderaxespad=0., fontsize=22)
     plt.savefig(f"{fig_path}")
     plt.close()
