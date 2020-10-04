@@ -206,6 +206,16 @@ process_stable_k(DATASET, "Distribution/PO_Metrics/K", metrics=PROCESS_METRICS_F
                  title="Process Metrics: Stable K's",
                  file_descriptor="Process_Metrics")
 
+# class metrics stable for k's (line plot)
+Path(path.dirname("results/Distribution/Class_Metrics/K/")).mkdir(parents=True, exist_ok=True)
+process_stable_k(DATASET, "Distribution/Class_Metrics/K", metrics=CLASS_ATTRIBUTES_QTY_Fields, yticks=[1, 10, 25, 50, 100, 500, 1000],
+                 title="Class Attributes: Stable K's",
+                 file_descriptor="Class_Attributes_K")
+
+process_stable_k(DATASET, "Distribution/Class_Metrics/K", metrics=CLASS_METRICS_Fields, yticks=[1, 10, 25, 50, 100, 500, 1000],
+                 title="Class Metrics: Stable K's",
+                 file_descriptor="Class_Metrics_K")
+
 log('Generating Statistics took %s seconds.' % (time.time() - start_time))
 log_close()
 close_connection()
