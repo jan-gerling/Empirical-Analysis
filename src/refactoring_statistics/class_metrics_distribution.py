@@ -147,7 +147,7 @@ start_time = time.time()
 
 # class metrics individual refactorings
 Path(path.dirname("results/Distribution/Class_Metrics/Refactorings/")).mkdir(parents=True, exist_ok=True)
-metrics_refactorings_individual_levels(DATASET, "Distribution/Class_Metrics/Refactorings", yticks=[1, 10, 25, 50, 100], metrics=CLASS_ATTRIBUTES_QTY_Fields,
+metrics_refactorings_individual_levels(DATASET, "Distribution/Class_Metrics/Refactorings", yticks=[1, 2.5, 3.5, 5, 7.5, 10, 15, 20, 25, 50, 75, 90, 100], metrics=CLASS_ATTRIBUTES_QTY_Fields,
                                        title="Class Attributes: Refactorings",
                                        file_descriptor="Class_Attributes")
 
@@ -161,13 +161,13 @@ metrics_refactorings_individual_levels(DATASET, "Distribution/PO_Metrics/Refacto
                                        title="Ownership Metrics: Refactorings",
                                        file_descriptor="Ownership_Metrics")
 
-metrics_refactorings_individual_levels(DATASET, "Distribution/PO_Metrics/Refactorings", yticks=[1, 10, 25, 50, 100], metrics=PROCESS_METRICS_FIELDS,
+metrics_refactorings_individual_levels(DATASET, "Distribution/PO_Metrics/Refactorings", yticks=[1, 2.5, 3.5, 5, 7.5, 10, 15, 20, 25, 50, 75, 90, 100], metrics=PROCESS_METRICS_FIELDS,
                                        title="Process Metrics: Refactorings",
                                        file_descriptor="Process_Metrics")
 
 # class metrics refactoring levels
 Path(path.dirname("results/Distribution/Class_Metrics/Refactoring/")).mkdir(parents=True, exist_ok=True)
-metrics_refactoring_levels(DATASET, "Distribution/Class_Metrics/Refactoring", yticks=[1, 10, 25, 50, 100], metrics=CLASS_ATTRIBUTES_QTY_Fields,
+metrics_refactoring_levels(DATASET, "Distribution/Class_Metrics/Refactoring", yticks=[1, 2.5, 3.5, 5, 7.5, 10, 15, 20, 25, 50, 75, 90, 100], metrics=CLASS_ATTRIBUTES_QTY_Fields,
                            title="Class Attributes: Refactoring Levels",
                            file_descriptor="Class_Attributes_Refactoring")
 
