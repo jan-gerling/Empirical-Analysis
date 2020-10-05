@@ -245,7 +245,7 @@ process_stable_k(DATASET, "Distribution/Class_Metrics/K", metrics=CLASS_METRICS_
                  title="Class Metrics: Stable K's",
                  file_descriptor="Class_Metrics_K")
 
-metrics_stable_levels(DATASET, "Distribution/Class_Metrics/K", yticks=[100, 125, 150, 250, 500, 750, 1000, 1500], metrics=CLASS_LARGE_Fields,
+process_stable_k(DATASET, "Distribution/Class_Metrics/K", yticks=[100, 125, 150, 250, 500, 750, 1000, 1500], metrics=CLASS_LARGE_Fields,
                       title="Class Metrics Large: Stable K's",
                       file_descriptor="Class_Metrics_Large_K")
 
