@@ -166,7 +166,7 @@ metrics_refactorings_individual_levels(DATASET, "Distribution/PO_Metrics/Refacto
                  file_descriptor="Process_Metrics")
 
 Path(path.dirname("results/Distribution/PO_Metrics/Refactorings/")).mkdir(parents=True, exist_ok=True)
-metrics_refactorings_individual_levels(DATASET, "Distribution/PO_Metrics/Refactorings", metrics=PROCESS_METRICS_FIELDS, yticks=[0.1, 0.15, 0.25, 0.5, 0.75, 1, 1.5, 2.0, 2.5, 5, 6],
+metrics_refactorings_individual_levels(DATASET, "Distribution/PO_Metrics/Refactorings", metrics=OWNERSHIP_METRICS_FIELDS, yticks=[0.1, 0.15, 0.25, 0.5, 0.75, 1, 1.5, 2.0, 2.5, 5, 6],
                  title="Ownership Metrics: Refactorings",
                  file_descriptor="Ownership_Metrics")
 
@@ -216,7 +216,7 @@ process_stable_k(DATASET, "Distribution/PO_Metrics/K", metrics=PROCESS_METRICS_F
                  file_descriptor="Process_Metrics")
 
 Path(path.dirname("results/Distribution/PO_Metrics/K/")).mkdir(parents=True, exist_ok=True)
-process_stable_k(DATASET, "Distribution/PO_Metrics/K", metrics=PROCESS_METRICS_FIELDS, yticks=[0.1, 0.15, 0.25, 0.5, 0.75, 1, 1.5, 2.0, 2.5, 5, 6],
+process_stable_k(DATASET, "Distribution/PO_Metrics/K", metrics=OWNERSHIP_METRICS_FIELDS, yticks=[0.1, 0.15, 0.25, 0.5, 0.75, 1, 1.5, 2.0, 2.5, 5, 6],
                  title="Ownership Metrics: Stable K's",
                  file_descriptor="Ownership_Metrics")
 
