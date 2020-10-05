@@ -200,7 +200,7 @@ process_metrics_levels(DATASET, "Distribution/PO_Metrics/Levels", yticks=[1, 2.5
                        title="Process Metrics: Refactorings vs Stable Instances",
                        file_descriptor="Process_Metrics")
 
-process_metrics_levels(DATASET, "Distribution/PO_Metrics/Levels", yticks=[0.1, 0.15, 0.25, 0.5, 0.75, 1, 1.5, 2.0, 2.5, 5, 6, 7.5, 10, 15, 20, 25, 50, 75, 90, 100, 125, 150], metrics=PROCESS_METRICS_FIELDS,
+process_metrics_levels(DATASET, "Distribution/PO_Metrics/Levels", yticks=[0.1, 0.15, 0.25, 0.5, 0.75, 1, 1.5, 2.0, 2.5, 5, 6, 7.5, 10, 15, 20, 25, 50, 75, 90, 100, 125, 150], metrics=PROCESS_METRICS_FIELDS+OWNERSHIP_METRICS_FIELDS,
                        title="Process- and Ownership Metrics: Refactorings vs Stable Instances",
                        file_descriptor="Process_Ownership_Metrics")
 
