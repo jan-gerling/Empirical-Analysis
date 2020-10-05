@@ -217,15 +217,15 @@ metrics_refactorings_individual_levels(DATASET, "Distribution/PO_Metrics/Refacto
 
 # class metrics refactoring levels
 Path(path.dirname("results/Distribution/Class_Metrics/Refactoring/")).mkdir(parents=True, exist_ok=True)
-metrics_refactoring_levels(DATASET, "Distribution/Class_Metrics/Refactoring", yticks=[1, 2.5, 3.5, 5, 7.5, 10, 15, 20, 25, 50, 75, 90, 100, 125, 150, 200], metrics=CLASS_ATTRIBUTES_QTY_Fields,
+metrics_refactoring_levels(DATASET, "Distribution/Class_Metrics/Refactoring", yticks=[0.1, 0.15, 0.25, 0.5, 0.75, 1, 2.5, 3.5, 5, 7.5, 10, 15, 20, 25, 35, 50, 75, 100, 125, 150, 200, 250], metrics=CLASS_ATTRIBUTES_QTY_Fields,
                            title="Class Attributes: Refactoring Levels",
                            file_descriptor="Class_Attributes_Refactoring")
 
-metrics_refactoring_levels(DATASET, "Distribution/Class_Metrics/Refactoring", yticks=[1, 10, 25, 50, 100, 125, 150, 200, 250, 350, 500, 650, 750, 1000, 1500], metrics=CLASS_METRICS_Fields,
+metrics_refactoring_levels(DATASET, "Distribution/Class_Metrics/Refactoring", yticks=[1, 2.5, 3.5, 5, 7.5, 10, 15, 20 25, 50, 100, 125, 150, 200, 250, 350, 500, 650, 750, 1000, 1500], metrics=CLASS_METRICS_Fields,
                            title="Class Metrics: Refactoring Levels",
                            file_descriptor="Class_Metrics_Refactoring")
 
-metrics_refactoring_levels(DATASET, "Distribution/Class_Metrics/Refactoring", yticks=[10, 15, 20, 25, 50, 75, 90, 100, 125, 150, 200, 250, 350, 500, 650, 750, 1000, 1500], metrics=CLASS_LARGE_Fields,
+metrics_refactoring_levels(DATASET, "Distribution/Class_Metrics/Refactoring", yticks=[1, 2.5, 3.5, 5, 7.5, 10, 15, 20, 25, 50, 75, 90, 100, 125, 150, 200, 250, 350, 500, 650, 750], metrics=CLASS_LARGE_Fields,
                                        title="Class Metrics Large: Levels",
                                        file_descriptor="Class_Metrics_Large_Refactoring")
 
