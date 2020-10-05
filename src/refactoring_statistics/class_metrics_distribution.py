@@ -144,6 +144,22 @@ def process_stable_k(dataset, save_dir, metrics, yticks, title, file_descriptor)
         log(f"--Skipped plot at {fig_path_box}, because it already exists.")
 
 
+def level_stable_k(level, dataset, save_dir, metrics, yticks, title, file_descriptor):
+    # stable metrics for all level and k
+    fig_path_box = f"results/{save_dir}/{file_descriptor}_line_plot_{dataset}.{IMG_FORMAT}"
+    if not path.exists(fig_path_box):
+        combined_stable_metrics = pd.DataFrame()
+        for k in STABLE_Ks:
+            stable_metrics = get_metrics_stable_level(level, k, dataset, metrics, samples=STABLE_SAMPLES)
+            stable_metrics['K'] = k
+            stable_metrics = pd.melt(stable_metrics, id_vars="K", var_name="Metric", value_vars=metrics, value_name="values")
+            combined_stable_metrics = combined_stable_metrics.append(stable_metrics)
+        # plot
+        line_plot_seaborn(combined_stable_metrics, title, fig_path_box, xticks=STABLE_Ks, yticks=yticks, scale="log")
+    else:
+        log(f"--Skipped plot at {fig_path_box}, because it already exists.")
+
+
 log_init(f"results/Distribution/class_metrics_distribution_{datetime.datetime.now().strftime('%Y-%m-%d-%H-%M-%S')}.txt")
 start_time = time.time()
 
@@ -236,18 +252,19 @@ process_stable_k(DATASET, "Distribution/PO_Metrics/K", metrics=OWNERSHIP_METRICS
                  file_descriptor="Ownership_Metrics")
 
 # class metrics stable for k's (line plot)
-Path(path.dirname("results/Distribution/Class_Metrics/K/")).mkdir(parents=True, exist_ok=True)
-process_stable_k(DATASET, "Distribution/Class_Metrics/K", metrics=CLASS_ATTRIBUTES_QTY_Fields, yticks=[10, 15, 20, 25, 50, 75, 90, 100, 125, 150, 200, 250, 350, 500, 650, 750, 1000, 1500],
-                 title="Class Attributes: Stable K's",
-                 file_descriptor="Class_Attributes_K")
+for level in STABLE_LEVELS:
+    Path(path.dirname("results/Distribution/Class_Metrics/K/")).mkdir(parents=True, exist_ok=True)
+    level_stable_k(level, DATASET, "Distribution/Class_Metrics/K", metrics=CLASS_ATTRIBUTES_QTY_Fields, yticks=[10, 15, 20, 25, 50, 75, 90, 100, 125, 150, 200, 250, 350, 500, 650, 750, 1000, 1500],
+                     title=f"Class Attributes: Stable K's at {str(level)}",
+                     file_descriptor=f"Class_Attributes_K_{int(level)}")
 
-process_stable_k(DATASET, "Distribution/Class_Metrics/K", metrics=CLASS_METRICS_Fields, yticks=[10, 15, 20, 25, 50, 75, 90, 100, 125, 150, 200, 250, 350, 500, 650, 750, 1000, 1500],
-                 title="Class Metrics: Stable K's",
-                 file_descriptor="Class_Metrics_K")
+    level_stable_k(level, DATASET, "Distribution/Class_Metrics/K", metrics=CLASS_METRICS_Fields, yticks=[10, 15, 20, 25, 50, 75, 90, 100, 125, 150, 200, 250, 350, 500, 650, 750, 1000, 1500],
+                     title=f"Class Metrics: Stable K's at {str(level)}",
+                     file_descriptor=f"Class_Metrics_K_{int(level)}")
 
-process_stable_k(DATASET, "Distribution/Class_Metrics/K", yticks=[10, 15, 20, 25, 50, 75, 90, 100, 125, 150, 200, 250, 350, 500, 650, 750, 1000, 1500], metrics=CLASS_LARGE_Fields,
-                      title="Class Metrics Large: Stable K's",
-                      file_descriptor="Class_Metrics_Large_K")
+    level_stable_k(level, DATASET, "Distribution/Class_Metrics/K", yticks=[10, 15, 20, 25, 50, 75, 90, 100, 125, 150, 200, 250, 350, 500, 650, 750, 1000, 1500], metrics=CLASS_LARGE_Fields,
+                          title=f"Class Metrics Large: Stable K's at {str(level)}",
+                          file_descriptor=f"Class_Metrics_Large_K_{int(level)}")
 
 log('Generating Statistics took %s seconds.' % (time.time() - start_time))
 log_close()
