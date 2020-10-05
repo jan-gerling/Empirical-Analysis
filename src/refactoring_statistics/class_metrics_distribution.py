@@ -27,11 +27,13 @@ CLASS_METRICS_Fields = ["classCbo",
                         "classRfc",
                         "classWmc"]
 
+CLASS_LARGE_Fields = ["classLcom", "classLoc"]
+
 # Found by mauricio:
 # also relevant attributes for class level refactorings are "classLoc", "classUniqueWordsQty"
 # also relevant attributes for method level refactorings are "classNumberOfMethods", number of unique words in a class, classLOC
 # also relevant attributes for variable level refactorings arenumber of string literals in a class, number of variables in the method, "number of public fields in a class", number of variables in a class
-CLASS_ATTRIBUTES_QTY_Fields = ["classLoc", "classUniqueWordsQty", "classNumberOfMethods", "classStringLiteralsQty", "classNumberOfPublicFields", "classVariablesQty"]
+CLASS_ATTRIBUTES_QTY_Fields = ["classUniqueWordsQty", "classNumberOfMethods", "classStringLiteralsQty", "classNumberOfPublicFields", "classVariablesQty"]
 
 PROCESS_METRICS_FIELDS = ["qtyOfCommits",
                           "bugFixCount",
@@ -155,6 +157,10 @@ metrics_refactorings_individual_levels(DATASET, "Distribution/Class_Metrics/Refa
                                        title="Class Metrics: Refactorings",
                                        file_descriptor="Class_Metrics")
 
+metrics_refactorings_individual_levels(DATASET, "Distribution/Class_Metrics/Refactorings", yticks=[100, 125, 150, 250, 500, 750, 1000, 1500], metrics=CLASS_LARGE_Fields,
+                                       title="Class Metrics Large: Refactorings",
+                                       file_descriptor="Class_Metrics_Large")
+
 # process and ownership metrics individual refactorings
 Path(path.dirname("results/Distribution/PO_Metrics/Refactorings/")).mkdir(parents=True, exist_ok=True)
 metrics_refactorings_individual_levels(DATASET, "Distribution/PO_Metrics/Refactorings", yticks=[0.1, 0.15, 0.25, 0.5, 0.75, 1, 1.5, 2.0, 2.5, 5, 6, 7.5, 10, 15, 20, 25, 50, 75, 100, 125, 150], metrics=PROCESS_METRICS_FIELDS+OWNERSHIP_METRICS_FIELDS,
@@ -172,13 +178,18 @@ metrics_refactorings_individual_levels(DATASET, "Distribution/PO_Metrics/Refacto
 
 # class metrics refactoring levels
 Path(path.dirname("results/Distribution/Class_Metrics/Refactoring/")).mkdir(parents=True, exist_ok=True)
-metrics_refactoring_levels(DATASET, "Distribution/Class_Metrics/Refactoring", yticks=[1, 2.5, 3.5, 5, 7.5, 10, 15, 20, 25, 50, 75, 90, 100], metrics=CLASS_ATTRIBUTES_QTY_Fields,
+metrics_refactoring_levels(DATASET, "Distribution/Class_Metrics/Refactoring", yticks=[1, 2.5, 3.5, 5, 7.5, 10, 15, 20, 25, 50, 75, 90, 100, 125, 150], metrics=CLASS_ATTRIBUTES_QTY_Fields,
                            title="Class Attributes: Refactoring Levels",
                            file_descriptor="Class_Attributes_Refactoring")
 
 metrics_refactoring_levels(DATASET, "Distribution/Class_Metrics/Refactoring", yticks=[1, 10, 25, 50, 100, 500, 1000], metrics=CLASS_METRICS_Fields,
                            title="Class Metrics: Refactoring Levels",
                            file_descriptor="Class_Metrics_Refactoring")
+
+metrics_refactoring_levels(DATASET, "Distribution/Class_Metrics/Refactoring", yticks=[100, 125, 150, 250, 500, 750, 1000, 1500], metrics=CLASS_LARGE_Fields,
+                                       title="Class Metrics Large: Levels",
+                                       file_descriptor="Class_Metrics_Large_Refactoring")
+
 
 # class metrics stable levels
 Path(path.dirname("results/Distribution/Class_Metrics/Stable/")).mkdir(parents=True, exist_ok=True)
@@ -189,6 +200,10 @@ metrics_stable_levels(DATASET, "Distribution/Class_Metrics/Stable", yticks=[10, 
 metrics_stable_levels(DATASET, "Distribution/Class_Metrics/Stable", yticks=[10, 15, 20, 25, 50, 75, 100, 150, 250, 500, 1000], metrics=CLASS_METRICS_Fields,
                       title="Class Metrics: Stable Instances Levels",
                       file_descriptor="Class_Metrics_Stable")
+
+metrics_stable_levels(DATASET, "Distribution/Class_Metrics/Stable", yticks=[100, 125, 150, 250, 500, 750, 1000, 1500], metrics=CLASS_LARGE_Fields,
+                           title="Class Metrics Large: Stable Instances Levels",
+                           file_descriptor="Class_Metrics_Large_Stable")
 
 # process metrics all levels
 Path(path.dirname("results/Distribution/PO_Metrics/Levels/")).mkdir(parents=True, exist_ok=True)
@@ -229,6 +244,10 @@ process_stable_k(DATASET, "Distribution/Class_Metrics/K", metrics=CLASS_ATTRIBUT
 process_stable_k(DATASET, "Distribution/Class_Metrics/K", metrics=CLASS_METRICS_Fields, yticks=[10, 15, 20, 25, 50, 75, 90, 100, 250, 500],
                  title="Class Metrics: Stable K's",
                  file_descriptor="Class_Metrics_K")
+
+metrics_stable_levels(DATASET, "Distribution/Class_Metrics/K", yticks=[100, 125, 150, 250, 500, 750, 1000, 1500], metrics=CLASS_LARGE_Fields,
+                      title="Class Metrics Large: Stable K's",
+                      file_descriptor="Class_Metrics_Large_K")
 
 log('Generating Statistics took %s seconds.' % (time.time() - start_time))
 log_close()
