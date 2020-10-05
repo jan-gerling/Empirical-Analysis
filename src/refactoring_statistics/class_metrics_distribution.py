@@ -254,15 +254,15 @@ process_stable_k(DATASET, "Distribution/PO_Metrics/K", metrics=OWNERSHIP_METRICS
 # class metrics stable for k's (line plot)
 for level in STABLE_LEVELS:
     Path(path.dirname("results/Distribution/Class_Metrics/K/")).mkdir(parents=True, exist_ok=True)
-    level_stable_k(level, DATASET, "Distribution/Class_Metrics/K", metrics=CLASS_ATTRIBUTES_QTY_Fields, yticks=[10, 15, 20, 25, 50, 75, 90, 100, 125, 150, 200, 250, 350, 500, 650, 750, 1000, 1500],
+    level_stable_k(level, DATASET, "Distribution/Class_Metrics/K", metrics=CLASS_ATTRIBUTES_QTY_Fields, yticks=[1, 2.5, 3.5, 5, 7.5, 10, 15, 20, 25, 50, 75, 90, 100, 125, 150, 200, 250, 350, 500, 650, 750, 1000, 1500],
                      title=f"Class Attributes: Stable K's at {str(level)}",
                      file_descriptor=f"Class_Attributes_K_{int(level)}")
 
-    level_stable_k(level, DATASET, "Distribution/Class_Metrics/K", metrics=CLASS_METRICS_Fields, yticks=[10, 15, 20, 25, 50, 75, 90, 100, 125, 150, 200, 250, 350, 500, 650, 750, 1000, 1500],
+    level_stable_k(level, DATASET, "Distribution/Class_Metrics/K", metrics=CLASS_METRICS_Fields, yticks=[1, 2.5, 3.5, 5, 7.5, 10, 15, 20, 25, 50, 75, 90, 100, 125, 150, 200, 250, 350, 500, 650, 750, 1000, 1500],
                      title=f"Class Metrics: Stable K's at {str(level)}",
                      file_descriptor=f"Class_Metrics_K_{int(level)}")
 
-    level_stable_k(level, DATASET, "Distribution/Class_Metrics/K", yticks=[10, 15, 20, 25, 50, 75, 90, 100, 125, 150, 200, 250, 350, 500, 650, 750, 1000, 1500], metrics=CLASS_LARGE_Fields,
+    level_stable_k(level, DATASET, "Distribution/Class_Metrics/K", yticks=[1, 2.5, 3.5, 5, 7.5, 10, 15, 20, 25, 50, 75, 90, 100, 125, 150, 200, 250, 350, 500, 650, 750, 1000, 1500], metrics=CLASS_LARGE_Fields,
                           title=f"Class Metrics Large: Stable K's at {str(level)}",
                           file_descriptor=f"Class_Metrics_Large_K_{int(level)}")
 
