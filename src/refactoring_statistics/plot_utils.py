@@ -114,7 +114,7 @@ def box_plot_seaborn(data, title, fig_path, scale: str, yticks=[], figsize=(22, 
 def line_plot_seaborn(data, title, fig_path, scale: str = "linear", xticks=[], yticks=[], figsize=(22, 16), hue="Metric"):
     sns.set(style="darkgrid")
     plt.figure(figsize=figsize)
-    sns_plot = sns.lineplot(x="K", y="values", hue=hue, data=data)
+    sns_plot = sns.lineplot(x="K", y="values", hue=hue, data=data, markers=True, ci=75)
     sns_plot.set_xlabel("K", fontsize=22)
     sns_plot.set_ylabel("", fontsize=0)
     sns_plot.set_title(title, fontsize=26)
