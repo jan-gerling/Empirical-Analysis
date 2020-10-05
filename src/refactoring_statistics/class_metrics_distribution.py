@@ -157,13 +157,9 @@ metrics_refactorings_individual_levels(DATASET, "Distribution/Class_Metrics/Refa
 
 # process and ownership metrics individual refactorings
 Path(path.dirname("results/Distribution/PO_Metrics/Refactorings/")).mkdir(parents=True, exist_ok=True)
-metrics_refactorings_individual_levels(DATASET, "Distribution/PO_Metrics/Refactorings", yticks=[0.1, 0.15, 0.25, 0.5, 0.75, 1, 1.5, 2.0, 2.5, 5, 6], metrics=OWNERSHIP_METRICS_FIELDS,
-                                       title="Ownership Metrics: Refactorings",
-                                       file_descriptor="Ownership_Metrics")
-
-metrics_refactorings_individual_levels(DATASET, "Distribution/PO_Metrics/Refactorings", yticks=[1, 2.5, 3.5, 5, 7.5, 10, 15, 20, 25, 50, 75, 100, 125, 150], metrics=PROCESS_METRICS_FIELDS,
-                                       title="Process Metrics: Refactorings",
-                                       file_descriptor="Process_Metrics")
+metrics_refactorings_individual_levels(DATASET, "Distribution/PO_Metrics/Refactorings", yticks=[0.1, 0.15, 0.25, 0.5, 0.75, 1, 1.5, 2.0, 2.5, 5, 6, 7.5, 10, 15, 20, 25, 50, 75, 100, 125, 150], metrics=PROCESS_METRICS_FIELDS+OWNERSHIP_METRICS_FIELDS,
+                                       title="Process- and Ownership Metrics: Refactorings",
+                                       file_descriptor="Process_Ownership_Metrics")
 
 # class metrics refactoring levels
 Path(path.dirname("results/Distribution/Class_Metrics/Refactoring/")).mkdir(parents=True, exist_ok=True)
@@ -197,13 +193,9 @@ process_metrics_levels(DATASET, "Distribution/PO_Metrics/Levels", yticks=[1, 2.5
 
 # process- and ownership metrics stable for k's (line plot)
 Path(path.dirname("results/Distribution/PO_Metrics/K/")).mkdir(parents=True, exist_ok=True)
-process_stable_k(DATASET, "Distribution/PO_Metrics/K", metrics=OWNERSHIP_METRICS_FIELDS, yticks=[0.1, 0.15, 0.25, 0.5, 0.75, 1, 1.5, 2.0, 2.5, 5, 6],
-                 title="Ownership Metrics: Stable K's",
-                 file_descriptor="Ownership_Metrics")
-
-process_stable_k(DATASET, "Distribution/PO_Metrics/K", metrics=PROCESS_METRICS_FIELDS, yticks=[1, 2.5, 3.5, 5, 7.5, 10, 15, 20, 25, 50, 75, 90, 100],
-                 title="Process Metrics: Stable K's",
-                 file_descriptor="Process_Metrics")
+process_stable_k(DATASET, "Distribution/PO_Metrics/K", metrics=PROCESS_METRICS_FIELDS+OWNERSHIP_METRICS_FIELDS, yticks=[0.1, 0.15, 0.25, 0.5, 0.75, 1, 1.5, 2.0, 2.5, 5, 6, 7.5, 10, 15, 20, 25, 50, 75, 90, 100],
+                 title="Process- and Ownership Metrics: Stable K's",
+                 file_descriptor="Process_Ownership_Metrics")
 
 # class metrics stable for k's (line plot)
 Path(path.dirname("results/Distribution/Class_Metrics/K/")).mkdir(parents=True, exist_ok=True)
