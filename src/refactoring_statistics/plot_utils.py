@@ -93,13 +93,10 @@ def box_plot(data, label, title, fig_path, scale: str = "log", yticks=[]):
     plt.close(fig)
 
 
-def box_plot_seaborn(data, title, fig_path, scale: str, yticks=[], figsize=(22, 16), hue="Instances", custom_palette=None):
+def box_plot_seaborn(data, title, fig_path, scale: str, yticks=[], figsize=(22, 16), hue="Instances", custom_palette="tab20"):
     sns.set(style="darkgrid")
-    palette = "tab20"
-    if custom_palette is not None:
-        palette = custom_palette
     plt.figure(figsize=figsize)
-    sns_plot = sns.boxplot(x="Metric", y="values", hue=hue, data=data, showfliers=False, showmeans=True, palette=palette,
+    sns_plot = sns.boxplot(x="Metric", y="values", hue=hue, data=data, showfliers=False, showmeans=True, palette=custom_palette,
                            meanprops={"marker":"o", "markerfacecolor":"white", "markeredgecolor":"black", "markersize":"18"})
     sns_plot.set_title(title, fontsize=26)
     plt.xticks(fontsize=18, rotation=30)
@@ -114,13 +111,10 @@ def box_plot_seaborn(data, title, fig_path, scale: str, yticks=[], figsize=(22, 
     log(f"--Saved box plot to {fig_path}")
 
 
-def line_plot_seaborn(data, title, fig_path, scale: str = "linear", xticks=[], yticks=[], figsize=(22, 16), hue="Metric", custom_palette=None):
+def line_plot_seaborn(data, title, fig_path, scale: str = "linear", xticks=[], yticks=[], figsize=(22, 16), hue="Metric", custom_palette="tab20"):
     sns.set(style="darkgrid")
-    palette = "tab20"
-    if custom_palette is not None:
-        palette = custom_palette
     plt.figure(figsize=figsize)
-    sns_plot = sns.lineplot(x="K", y="values", hue=hue, data=data, markers=True, ci=75, palette=palette)
+    sns_plot = sns.lineplot(x="K", y="values", hue=hue, data=data, markers=True, ci=75, palette=custom_palette)
     sns_plot.set_xlabel("K", fontsize=22)
     sns_plot.set_ylabel("", fontsize=0)
     sns_plot.set_title(title, fontsize=26)
