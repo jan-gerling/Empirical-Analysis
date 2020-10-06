@@ -181,6 +181,26 @@ def get_level_stable(level: int, commit_threshold: int, dataset: str = "", condi
                                stable_condition, dataset, "", get_instance_id=True)
 
 
+def get_level_stable(level: int, commit_threshold: int, dataset: str = "", conditions: str = "") -> str:
+    """
+    Get all stable instances with the given level and the corresponding metrics
+
+    Parameters:
+        level (int):                    get the stable instances for this level
+        commit_threshold (int):    filter for this specific commit threshold, specifying the 'stability' of the instance
+        dataset (str) (optional):       filter the project dataset for this
+        conditions (str) (optional):    additional sql conditions for this refactoring, e.g. (commitDate BETWEEN A and B).
+                                        DON'T add filter for the level or test; this is already done.
+    """
+    # only select valid refactorings from the database, if refactorings are selected
+    stable_condition: str = f"{stableCommits}.commitThreshold = {commit_threshold} AND {__stable_level_filter(level)} AND {file_type_filter(stableCommits)}"
+
+    if len(conditions) > 0:
+        stable_condition += f" AND {conditions}"
+    return get_instance_fields(stableCommits, [(stableCommits, []), (commitMetaData, [])] + get_metrics_level(level),
+                               stable_condition, dataset, "", get_instance_id=True)
+
+
 def file_type_filter(instance_name: str) -> str:
     """
     Add restriction whether to use only production, test or both files

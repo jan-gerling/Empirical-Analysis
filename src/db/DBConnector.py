@@ -8,7 +8,7 @@ from utils.log import log
 import sshtunnel
 
 config = configparser.ConfigParser()
-config.read(os.path.join(os.getcwd(), 'dbconfig.ini'))
+config.read(os.path.join(os.getcwd(), '../dbconfig.ini'))
 
 # connect to the mysql database either via ssh tunnel or directly
 mydb, tunnel = None, None
