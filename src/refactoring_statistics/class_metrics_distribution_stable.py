@@ -88,7 +88,10 @@ def level_merged_stable_k(save_dir, metrics, yticks, title, file_descriptor):
                 stable_metrics["Metric"] = stable_metrics["Metric"].apply(lambda x: f"{x} {str(level)}")
                 combined_stable_metrics = combined_stable_metrics.append(stable_metrics)
         # plot
-        line_plot_seaborn(combined_stable_metrics, title, fig_path_box, xticks=STABLE_Ks, yticks=yticks, scale="log")
+        custom_palette = {"classCbo Level.Class":"red", "classCbo Level.Method":"brown", "classCbo Level.Variable":"orangered", "classCbo Level.Field":"maroon",
+                          "classTCC Level.Class":"green", "classTCC Level.Method":"olive", "classTCC Level.Variable":"lime", "classTCC Level.Field":"yellowgreen",
+                          "classWmc Level.Class":"blue", "classWmc Level.Method":"navy", "classWmc Level.Variable":"cyan", "classWmc Level.Field":"dodgerblue"}
+        line_plot_seaborn(combined_stable_metrics, title, fig_path_box, xticks=STABLE_Ks, yticks=yticks, scale="log", custom_palette=custom_palette)
     else:
         log(f"--Skipped plot at {fig_path_box}, because it already exists.")
 
