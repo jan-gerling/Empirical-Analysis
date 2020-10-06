@@ -143,6 +143,13 @@ def get_metrics_stable_level(level, k, dataset, metrics, samples=-1):
     return metric_data
 
 
+def get_metrics_stable_level_unqique_metrics(level, k, metrics, samples=-1):
+    query = f"SELECT classmetric.* FROM classmetric INNER JOIN (SELECT DISTINCT classMetrics_id FROM stablecommit WHERE isTest = FALSE AND LEVEL = {int(level)} AND commitThreshold = {k}) unique_metrics ON unique_metrics.classMetrics_id = classmetric.id;"
+    metric_data = retrieve_columns(query, metrics, samples)
+    log(f"Extracted metrics of level {level} at {k}")
+    return metric_data
+
+
 def get_metrics_stable_all(k, dataset, levels, metrics, samples=-1):
     combined_stable_metrics = pd.DataFrame()
     for level in levels:
@@ -159,8 +166,11 @@ def retrieve_columns(sql_query, columns, samples=-1):
     cache_dir = path.join(CACHE_DIR_PATH, "_cache")
     file_path = path.join(cache_dir, f"{query_hash}.csv")
 
-    data = pd.read_csv(file_path, usecols=columns).apply(pd.to_numeric, downcast='float')
-    if samples < 0 or len(data) < samples:
-        return data
+    if path.exists(file_path):
+        data = pd.read_csv(file_path, usecols=columns).apply(pd.to_numeric, downcast='float')
+        if samples < 0 or len(data) < samples:
+            return data
+        else:
+            return data.sample(samples)
     else:
-        return data.sample(samples)
+        return execute_query(sql_query)
