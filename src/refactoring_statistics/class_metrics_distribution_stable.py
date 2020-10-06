@@ -96,13 +96,13 @@ def level_merged_stable_k(save_dir, metrics, yticks, title, file_descriptor):
 log_init(f"results/Distribution/class_metrics_distribution_{datetime.datetime.now().strftime('%Y-%m-%d-%H-%M-%S')}.txt")
 start_time = time.time()
 
+Path(path.dirname("results/Distribution/Class_Metrics/K/")).mkdir(parents=True, exist_ok=True)
 level_merged_stable_k("Distribution/Class_Metrics/K", metrics=CLASS_METRICS_REDUCED_Fields, yticks=[1, 2.5, 3.5, 5, 7.5, 10, 15, 20, 25, 50, 75, 90, 100, 125, 150, 200, 250, 300, 350],
                       title=f"Class Metrics: Stable K's",
                       file_descriptor=f"Class_Metrics_Reduced_K")
 
 # class metrics stable for k's (line plot)
 for level in STABLE_LEVELS:
-    Path(path.dirname("results/Distribution/Class_Metrics/K/")).mkdir(parents=True, exist_ok=True)
     level_stable_k(level, "Distribution/Class_Metrics/K", metrics=CLASS_ATTRIBUTES_QTY_Fields, yticks=[1, 2.5, 3.5, 5, 7.5, 10, 15, 20, 25, 50, 75, 90, 100, 125, 150, 200, 250, 300, 350],
                    title=f"Class Attributes: Stable K's at {str(level)}",
                    file_descriptor=f"Class_Attributes_K_{int(level)}")
