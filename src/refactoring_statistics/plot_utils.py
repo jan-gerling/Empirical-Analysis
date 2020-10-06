@@ -95,7 +95,7 @@ def box_plot(data, label, title, fig_path, scale: str = "log", yticks=[]):
 
 def box_plot_seaborn(data, title, fig_path, scale: str, yticks=[], figsize=(22, 16), hue="Instances"):
     sns.set(style="darkgrid")
-    sns.color_palette("Paired")
+    sns.color_palette("tab20")
     plt.figure(figsize=figsize)
     sns_plot = sns.boxplot(x="Metric", y="values", hue=hue, data=data, showfliers=False, showmeans=True,
                            meanprops={"marker":"o", "markerfacecolor":"white", "markeredgecolor":"black", "markersize":"18"})
@@ -114,8 +114,8 @@ def box_plot_seaborn(data, title, fig_path, scale: str, yticks=[], figsize=(22, 
 
 def line_plot_seaborn(data, title, fig_path, scale: str = "linear", xticks=[], yticks=[], figsize=(22, 16), hue="Metric"):
     sns.set(style="darkgrid")
+    sns.color_palette("tab20")
     plt.figure(figsize=figsize)
-    sns.color_palette("Paired")
     sns_plot = sns.lineplot(x="K", y="values", hue=hue, data=data, markers=True, ci=75)
     sns_plot.set_xlabel("K", fontsize=22)
     sns_plot.set_ylabel("", fontsize=0)
