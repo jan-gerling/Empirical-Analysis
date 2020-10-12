@@ -6,7 +6,8 @@ from collections import Counter
 from configs import Level, LEVEL_MAP
 
 
-DIRECTORY = "results/predictions/"
+INPUT_DIRECTORY = "results/predictions/reproduction/"
+SAVE_DIRECTORY = "results/Evaluations/reproduction/"
 
 
 # import all json files in the given directory and return them as pd dataframe
@@ -104,7 +105,7 @@ def count_appearances(column):
 
 
 # data import
-data = import_evaluation(DIRECTORY)
+data = import_evaluation(INPUT_DIRECTORY)
 
 # data preparation
 data['level'] = list(map(get_refactoring_level, data["refactoring type"]))
@@ -112,8 +113,8 @@ test_scores = extract_columns(data, ["f1_scores", "precision_scores", "recall_sc
 feature_importances = add_feature_importances(data, ["feature_importance", "feature_coefficients", "permutation_importance"])
 feature_importances_statistics = extract_feature_importances_statistic(feature_importances, ["feature_importance", "feature_coefficients", "permutation_importance"])
 
-Path(path.dirname("results/Evaluation/")).mkdir(parents=True, exist_ok=True)
-test_scores.to_excel("results/Evaluation/test_scores_all.xlsx", index=False)
-feature_importances.to_excel("results/Evaluation/feature_importances_all.xlsx", index=False)
-feature_importances_statistics.to_excel("results/Evaluation/feature_importances_statistics.xlsx")
+Path(path.dirname(SAVE_DIRECTORY)).mkdir(parents=True, exist_ok=True)
+test_scores.to_excel(f"{SAVE_DIRECTORY}test_scores_all.xlsx", index=False)
+feature_importances.to_excel(f"{SAVE_DIRECTORY}feature_importances_all.xlsx", index=False)
+feature_importances_statistics.to_excel(f"{SAVE_DIRECTORY}feature_importances_statistics.xlsx")
 exit()

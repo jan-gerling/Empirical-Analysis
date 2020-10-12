@@ -71,6 +71,7 @@ def execute_query(sql_query):
                 for df in chunks:
                     store_header = not os.path.exists(file_path)
                     df.to_csv(file_path, mode="a", index=False, header=store_header)
+                print(f"Wrote cache for query: {sql_query}")
                 return pd.read_csv(file_path, dtype=object)
             else:
                 data = pd.DataFrame()

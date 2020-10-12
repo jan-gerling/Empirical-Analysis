@@ -1,79 +1,109 @@
+import pandas as pd
+import datetime
 from configs import Level, LEVEL_MAP
-from refactoring_statistics.query_utils import query_evolution, query_evolution_level
+from refactoring_statistics.query_utils import get_metrics_refactorings, get_metrics_stable_level
 from utils.log import log_init, log_close, log
 import time
 from os import path
 from pathlib import Path
 import matplotlib.pyplot as plt
-import numpy as np
+import seaborn as sns
 
 
-def plot_violin(data, label, count, level, scale: str = "symlog", points: int = 500):
-    fig, ax = plt.subplots(figsize=(max(len(label), 32), 12), dpi=120)
-    ax.set_title(f"Refactoring type distribution with mean per {count} ({str(level)})")
-    ax.violinplot(data, widths=0.7, points=points, showmeans=True, showextrema=True, showmedians=False)
-    plt.xticks(np.arange(len(label)), label, rotation=30)
-    plt.yscale(scale)
-    plt.ylabel(f"{count}")
-    plt.xlabel("Refactoring types")
-
-    fig_path = f"results/Evolution/Refactorings_Commit_Count_{count}_{str(level)}_{scale}_{points}_mean_extrema_violin.png"
-    plt.savefig(fig_path)
-    log(f"Saved violin plot to {fig_path}")
+REFACTORING_SAMPLES = 150000
+STABLE_SAMPLES = 300000
+STABLE_Ks = [15, 20, 25, 30, 35, 40, 45, 50, 60, 70, 80, 90, 100]
+REFACTORING_LEVELS = [Level.Class, Level.Method, Level.Variable, Level.Field, Level.Other]
+STABLE_LEVELS = [Level.Class, Level.Method, Level.Variable, Level.Field]
+SAVE_DIR = "results/Evolution/"
+METRICS = ["qtyOfCommits", "refactoringsInvolved"]
 
 
-def plot_distribution(x_data, y_data, label, count, level, scale: str = "symlog"):
-    fig, ax = plt.subplots(figsize=(max(len(label), 32), 12), dpi=120)
-    ax.set_title(f"Refactoring type distribution per {count} ({str(level)})")
+def get_frequency_data_refactorings(level, metric):
+    data_path = f"{SAVE_DIR}refactoring_{level.name}_{metric}.csv"
+    if not path.exists(data_path):
+        refactorings = LEVEL_MAP[level]
+        data = get_metrics_refactorings(level, "", refactorings, METRICS, REFACTORING_SAMPLES)
+
+        frequency_data = pd.DataFrame()
+        for refactoring_name in refactorings:
+            refactoring_data = data[data["refactoring"] == refactoring_name]
+            fraction = refactoring_data[metric].value_counts(normalize=True, sort=False)
+            frequency_data[refactoring_name] = fraction
+        # convert the index to a column, as it inherently contains the metric count
+        frequency_data = frequency_data.sort_index()
+        frequency_data[metric] = frequency_data.index
+        frequency_data.to_csv(data_path, index=False)
+        return frequency_data.sort_index()
+    else:
+        return pd.read_csv(data_path)
+
+
+def get_frequency_data_stable(level, metric):
+    data_path = f"{SAVE_DIR}stable_{level.name}_{metric}.csv"
+    if not path.exists(data_path):
+        frequency_data = pd.DataFrame()
+        for k in STABLE_Ks:
+            data = get_metrics_stable_level(level, k, "", [metric], STABLE_SAMPLES)
+            fraction = data[metric].value_counts(normalize=True, sort=False)
+            frequency_data[k] = fraction
+        # convert the index to a column, as it inherently contains the metric count
+        frequency_data = frequency_data.sort_index()
+        frequency_data[metric] = frequency_data.index
+        frequency_data.to_csv(data_path, index=False)
+        return frequency_data.sort_index()
+    else:
+        return pd.read_csv(data_path)
+
+
+def line_plot_seaborn(data, x: str, y: str, hue: str, level, scale: str = "log", figsize=(22, 16), custom_palette="tab20"):
+    fig_path = f"{SAVE_DIR}{hue}_{level.name}_{x}_{y}_plot.svg"
+    title = f"{y} per {x} for {level.name} refactorings"
+    xticks = [1, 2, 3, 4, 5, 6, 8, 10, 15, 20, 30, 40, 50, 60, 80, 100]
+    sns.set(style="darkgrid")
+    plt.figure(figsize=figsize)
+    sns_plot = sns.lineplot(x=x, y=y, hue=hue, data=data, markers=True, palette=custom_palette)
+    sns_plot.set_xlabel(x, fontsize=22)
+    sns_plot.set_ylabel(y, fontsize=22)
+    sns_plot.set_title(title, fontsize=26)
     plt.xscale(scale)
-    plt.xlabel(f"{count}")
-    plt.ylabel(f"likelihood")
-    for index, distribution in enumerate(x_data):
-        plt.plot(x_data[index], y_data[index], label=f"{label[index]}")
-    plt.legend()
-    fig_path = f"results/Evolution/Refactorings_Commit_Count_{count}_{str(level)}_{scale}_pf.png"
-    plt.savefig(fig_path)
-    log(f"Saved distribution plot to {fig_path}")
+    plt.xticks(xticks, fontsize=18)
+    sns_plot.set_xticklabels(["$%i$" % x for x in xticks], fontsize=18)
+    plt.legend(loc=0, borderaxespad=0., fontsize=22)
+    plt.savefig(f"{fig_path}")
+    plt.close()
+    log(f"--Saved box plot to {fig_path}")
 
 
-def query_plot(refactorings, level, count: str):
-    counts_aggregate = query_evolution("Refactorings_Commit_Count", count, True, refactorings)
-    plot_distribution([df[f"{count}"] for df in counts_aggregate],
-                      [df["refactoring_count"].div(df[f"{count}_total"]) for df in counts_aggregate],
-                      refactorings, count, level)
-    counts_raw = query_evolution("Refactorings_Commit_Count", count, False, refactorings)
-    plot_violin([df[f"{count}"].values for df in counts_raw], refactorings, count, level)
-    return counts_aggregate, counts_raw
+def plot_cdf(frequency_data, metric, var_name, level):
+    frequency_data_cdf = frequency_data.loc[:, frequency_data.columns != metric].cumsum()
+    frequency_data_cdf[metric] = frequency_data[metric]
+    frequency_data_cdf_melt = pd.melt(frequency_data_cdf, id_vars=metric, var_name=var_name, value_name="CDF")
+    line_plot_seaborn(frequency_data_cdf_melt, x=metric, y="CDF", hue=var_name, level=level)
 
 
-def query_plot_level(levels, count: str):
-    counts_aggregate = query_evolution_level("Refactorings_Commit_Count", count, True, levels)
-    plot_distribution([df[f"{count}"] for df in counts_aggregate],
-                      [df["refactoring_count"].div(df[f"{count}_total"]) for df in counts_aggregate],
-                      levels, count, "all_level")
-    counts_raw = query_evolution_level("Refactorings_Commit_Count", count, False, levels)
-    plot_violin([df[f"{count}"].values for df in counts_raw], levels, count, "all_level")
-    return counts_aggregate, counts_raw
+def plot_frequency(frequency_data, metric, var_name, level):
+    frequency_data_melt = pd.melt(frequency_data, id_vars=metric, var_name=var_name, value_name="Frequency")
+    line_plot_seaborn(frequency_data_melt, x=metric, y="Frequency", hue=var_name, level=level)
 
 
-log_init(f"")
+log_init(f"results/Evolution/statistics_{datetime.datetime.now().strftime('%Y-%m-%d-%H-%M-%S')}.txt")
 log('Begin Statistics')
 start_time = time.time()
 
-Path(path.dirname("results/Evolution/")).mkdir(parents=True, exist_ok=True)
+Path(path.dirname(SAVE_DIR)).mkdir(parents=True, exist_ok=True)
+for metric in METRICS:
+    for level in REFACTORING_LEVELS:
+        frequency_data = get_frequency_data_refactorings(level, metric).head(101)
+        plot_frequency(frequency_data, metric, "refactoring", level)
+        plot_cdf(frequency_data, metric, "refactoring", level)
 
-levels = list(Level)[1:]
-query_plot_level(levels, "qtyOfCommits")
-query_plot_level(levels, "qtyOfRefactorings")
-# for level in Level:
-# refactorings = LEVEL_MAP[level]
-#   if len(refactorings) > 0:
-#       log(f"-----{str(level)}")
-#       commit_counts_aggregate, commit_counts_raw = query_plot(refactorings, level, "qtyOfCommits")
-#       refactoring_counts_aggregate, refactoring_counts_raw = query_plot(refactorings, level, "qtyOfRefactorings")
+    for level in STABLE_LEVELS:
+        frequency_data_stable = get_frequency_data_stable(level, metric).head(101)
+        plot_frequency(frequency_data_stable, metric, "k", level)
+        plot_cdf(frequency_data_stable, metric, "k", level)
 
-
-log(f"Processing statistics took {time.time() - start_time:.2f} seconds.")
+log(f"Processing refactoring evolution took {time.time() - start_time:.2f} seconds.")
 log_close()
 
 exit()

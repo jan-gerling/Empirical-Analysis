@@ -58,36 +58,6 @@ def query_aggregate(table_name: str, function: str, refactorings, descriptor: st
     return dataframe, labels
 
 
-def query_evolution(table_name: str, count: str, aggregated: bool, refactorings):
-    data = []
-    for refactoring_name in refactorings:
-        if not aggregated:
-            query = f"SELECT {count} FROM {table_name} WHERE refactoring LIKE \"{refactoring_name}\""
-            commit_count = execute_query(query)
-        else:
-            query = f"SELECT {count}, COUNT({count}) AS \"refactoring_count\" FROM {table_name} WHERE refactoring LIKE \"{refactoring_name}\" GROUP BY {count}"
-            commit_count = execute_query(query)
-            commit_count[f"{count}_total"] = sum(commit_count["refactoring_count"])
-        data.append(commit_count)
-    log(f"Got {count} from {table_name} for these refactorings: {refactorings}.")
-    return data
-
-
-def query_evolution_level(table_name: str, count: str, aggregated: bool, levels):
-    data = []
-    for level in levels:
-        if not aggregated:
-            query = f"SELECT {count} FROM {table_name} WHERE refactoring_level = {level}"
-            commit_count = execute_query(query)
-        else:
-            query = f"SELECT {count}, COUNT({count}) AS \"refactoring_count\" FROM {table_name} WHERE refactoring_level = {level} GROUP BY {count}"
-            commit_count = execute_query(query)
-            commit_count[f"{count}_total"] = sum(commit_count["refactoring_count"])
-        data.append(commit_count)
-    log(f"Got {count} from {table_name} for these level: {levels}.")
-    return data
-
-
 def query_co_occurrence(table_name: str, entity_name: str, refactorings, statistic = Statistics.likelihood, descriptor: str = ""):
     dataframe = pd.DataFrame()
     file_path = f"results/Co-occurrence/{table_name}_{statistic}_{descriptor}_raw.csv"
@@ -143,7 +113,7 @@ def get_metrics_stable_level(level, k, dataset, metrics, samples=-1):
     return metric_data
 
 
-def get_metrics_stable_level_unqique_metrics(level, k, metrics, samples=-1):
+def get_metrics_stable_level_unique_metrics(level, k, metrics, samples=-1):
     query = f"SELECT classmetric.* FROM classmetric INNER JOIN (SELECT DISTINCT classMetrics_id FROM stablecommit WHERE isTest = FALSE AND LEVEL = {int(level)} AND commitThreshold = {k}) unique_metrics ON unique_metrics.classMetrics_id = classmetric.id;"
     metric_data = retrieve_columns(query, metrics, samples)
     log(f"Extracted metrics of level {level} at {k}")
@@ -156,6 +126,21 @@ def get_metrics_stable_all(k, dataset, levels, metrics, samples=-1):
         metric_data = get_metrics_stable_level(level, k, dataset, metrics, samples)
         combined_stable_metrics = combined_stable_metrics.append(metric_data)
     return combined_stable_metrics
+
+
+def get_last_refactored_instance(metrics, level, refactoring="", samples=-1):
+    refactoring_condition = ""
+    if len(refactoring) > 0:
+        refactoring_condition = f"AND refactoring LIKE \"{refactoring}\""
+    query = f"SELECT classmetric.*, processmetrics.* FROM (SELECT project_id, filePath, max(processMetrics_id) AS processMetrics_id, max(classmetrics_id) AS classmetrics_id FROM refactoringcommit WHERE isValid = True AND isTest = FALSE AND `level`={int(level)} {refactoring_condition} GROUP BY project_id, filePath, className) latest INNER JOIN classmetric ON classmetric.id = latest.classmetrics_id INNER JOIN processmetrics  ON processmetrics.id = latest.processMetrics_id;"
+    metric_data = retrieve_columns(query, metrics, samples)
+    return metric_data
+
+
+def get_last_refactored_instance_all(metrics, samples=-1):
+    query = f"SELECT classmetric.*, processmetrics.* FROM (SELECT max(processMetrics_id) AS processMetrics_id, max(classmetrics_id) AS classmetrics_id FROM refactoringcommit WHERE isValid = True AND isTest = FALSE GROUP BY project_id, filePath) latest INNER JOIN classmetric ON classmetric.id = latest.classmetrics_id INNER JOIN processmetrics  ON processmetrics.id = latest.processMetrics_id;"
+    metric_data = retrieve_columns(query, metrics, samples)
+    return metric_data
 
 
 def retrieve_columns(sql_query, columns, samples=-1):

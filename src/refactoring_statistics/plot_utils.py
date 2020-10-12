@@ -1,8 +1,11 @@
 import matplotlib.pyplot as plt
 import numpy as np
 #Copied from https://matplotlib.org/3.1.1/gallery/images_contours_and_fields/image_annotated_heatmap.html#sphx-glr-gallery-images-contours-and-fields-image-annotated-heatmap-py
+import pandas as pd
+from pathlib import Path
 from utils.log import log
 import seaborn as sns
+from os import path
 
 
 def heatmap(data, row_labels, col_labels, ax=None, cbar_kw={}, cbarlabel="", **kwargs):
@@ -65,6 +68,26 @@ def heatmap(data, row_labels, col_labels, ax=None, cbar_kw={}, cbarlabel="", **k
     return im, cbar
 
 
+def plot_histogram(data, title, xlabel, fig_path, text="", outliers=True):
+    Path(path.dirname(fig_path)).mkdir(parents=True, exist_ok=True)
+    fig, ax = plt.subplots()
+    if not outliers:
+        data_series = data.iloc[:,0]
+        lower_bound = data_series.quantile(.0)
+        upper_bound = data_series.quantile(.99)
+        data = data_series[data_series.between(lower_bound, upper_bound)]
+    n, bins, patches = plt.hist(data, 50, density=True, facecolor='g', alpha=0.75)
+    plt.xlabel(xlabel)
+    plt.ylabel('Probability')
+    if text != "":
+        plt.figtext(0.25, 0.85, text)
+    plt.title(title)
+    plt.grid(True)
+    plt.savefig(fig_path)
+    plt.close(fig)
+    log(f"--Saved histogram plot to {fig_path}")
+
+
 def plot_errorbar(x_label, mean, error, errortype:str, descriptor: str):
     fig, ax = plt.subplots()
     ax.errorbar(x_label, mean, error, linestyle='None', fmt='o')
@@ -111,6 +134,23 @@ def box_plot_seaborn(data, title, fig_path, scale: str, yticks=[], figsize=(22, 
     log(f"--Saved box plot to {fig_path}")
 
 
+def box_plot_seaborn_simple(data, title, fig_path, scale: str, yticks=[], figsize=(22, 16), custom_palette="tab20"):
+    sns.set(style="darkgrid")
+    plt.figure(figsize=figsize)
+    sns_plot = sns.boxplot(data=data, showfliers=False, showmeans=True, palette=custom_palette,
+                           meanprops={"marker":"o", "markerfacecolor":"white", "markeredgecolor":"black", "markersize":"18"})
+    sns_plot.set_title(title, fontsize=26)
+    plt.xticks(fontsize=18, rotation=30)
+    plt.yscale(scale)
+    sns_plot.set_xlabel("", fontsize=0)
+    sns_plot.set_ylabel("", fontsize=0)
+    plt.yticks(yticks, fontsize=18)
+    sns_plot.set_yticklabels(["$%.2f$" % y for y in yticks], fontsize=18)
+    plt.savefig(f"{fig_path}")
+    plt.close()
+    log(f"--Saved box plot to {fig_path}")
+
+
 def line_plot_seaborn(data, title, fig_path, scale: str = "linear", xticks=[], yticks=[], figsize=(22, 16), hue="Metric", custom_palette="tab20"):
     sns.set(style="darkgrid")
     plt.figure(figsize=figsize)
@@ -127,3 +167,17 @@ def line_plot_seaborn(data, title, fig_path, scale: str = "linear", xticks=[], y
     plt.savefig(f"{fig_path}")
     plt.close()
     log(f"--Saved box plot to {fig_path}")
+
+
+def plot_violin(data, label, count, level, scale: str = "symlog", points: int = 500):
+    fig, ax = plt.subplots(figsize=(max(len(label), 32), 12), dpi=120)
+    ax.set_title(f"Refactoring type distribution with mean per {count} ({str(level)})")
+    ax.violinplot(data, widths=0.7, points=points, showmeans=True, showextrema=True, showmedians=False)
+    plt.xticks(np.arange(len(label)), label, rotation=30)
+    plt.yscale(scale)
+    plt.ylabel(f"{count}")
+    plt.xlabel("Refactoring types")
+
+    fig_path = f"results/Evolution/Refactorings_Commit_Count_{count}_{str(level)}_{scale}_{points}_mean_extrema_violin.png"
+    plt.savefig(fig_path)
+    log(f"Saved violin plot to {fig_path}")

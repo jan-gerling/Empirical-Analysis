@@ -1,140 +1,158 @@
-from configs import Level, LEVEL_MAP, CACHE_DIR_PATH, LEVEL_METRIC_MAP, LEVEL_METRIC_SET_MAP, PROCESS_METRICS_FIELDS
+from configs import Level, LEVEL_MAP, PROCESS_METRICS_FIELDS
 from db.QueryBuilder import get_level_refactorings, get_level_stable
-from db.DBConnector import close_connection
-from refactoring_statistics.plot_utils import box_plot
+from refactoring_statistics.plot_utils import plot_histogram, box_plot_seaborn, box_plot_seaborn_simple
+from refactoring_statistics.query_utils import retrieve_columns, get_last_refactored_instance, \
+    get_last_refactored_instance_all
 from utils.log import log_init, log_close, log
 import time
 import datetime
 import pandas as pd
-import hashlib
-import os.path
 from pathlib import Path
 from os import path
-import matplotlib.pyplot as plt
-import numpy as np
+from scipy import stats
 
 
-def refactoring_statistics(dataset, save_dir):
-    statistics = pd.DataFrame(columns=['refactoring_name', 'level', 'metric', 'descriptive_statistics'])
-    for level in [Level.Class, Level.Method, Level.Variable, Level.Field, Level.Other]:
-        for refactoring_name in LEVEL_MAP[level]:
-            # for metric in LEVEL_METRIC_MAP[level]:
-            #     metric_data = retrieve_columns(get_level_refactorings(int(level), refactoring_name, dataset), [metric])
-            #     new_statistics = {
-            #         'refactoring_name': refactoring_name,
-            #         'level': str(level),
-            #         'metric': metric,
-            #         'descriptive_statistics': f"{metric_data.describe()}"}
-            #     statistics.append(new_statistics, ignore_index=True)
-            # log(f"Collected all statistics for {refactoring_name} of the Level {str(level)}")
-            for name, metrics in [("PROCESS_METRICS", PROCESS_METRICS_FIELDS)]:
-                title = f"{name}_{str(level)}_{refactoring_name}"
-                fig_path = f"results/{save_dir}/{title}_log_box_plot.svg"
-                if not path.exists(fig_path):
-                    metric_data = retrieve_columns(get_level_refactorings(int(level), refactoring_name, dataset), metrics)
-                    box_plot(metric_data.to_numpy(), metrics, title, fig_path)
+# metrics
+CLASS_METRICS_Fields = ["classCbo",
+                        "classLcom",
+                        "classLCC",
+                        "classTCC",
+                        "classRfc",
+                        "classWmc"]
+
+CLASS_ATTRIBUTES_QTY_Fields = ["classUniqueWordsQty", "classNumberOfMethods", "classStringLiteralsQty",
+                               "classNumberOfPublicFields", "classVariablesQty", "classLoc"]
+METRIC_SETS = {"CLASS_METRICS_Fields": CLASS_METRICS_Fields, "CLASS_ATTRIBUTES_QTY_Fields": CLASS_ATTRIBUTES_QTY_Fields, "PO_METRIC_SETS": PROCESS_METRICS_FIELDS}.items()
+
+
+REFACTORING_SAMPLES = 100000
+STABLE_Ks = [15, 20, 25, 30, 35, 40, 45, 50, 60, 70, 80, 90, 100]
+STABLE_SAMPLES = 50000
+REFACTORING_LEVELS = [Level.Class, Level.Method, Level.Variable, Level.Field, Level.Other]
+STABLE_LEVELS = [Level.Class, Level.Method, Level.Variable, Level.Field]
+
+
+def compute_statistics(metric_data, level, metric, extra_field=""):
+    stat, p = stats.shapiro(metric_data)
+    alpha = 0.05
+    is_non_normal = p < alpha
+    skew = stats.skew(metric_data.to_numpy())[0]
+    extra_field_name = 'refactoring_name'
+    if len(extra_field) <= 3:
+        extra_field_name = 'k'
+    return {
+        f"{extra_field_name}": extra_field,
+        'level': str(level),
+        'metric': metric,
+        'skew': skew,
+        'mean': metric_data.mean().iloc[0],
+        'std': metric_data.std().iloc[0],
+        'min': metric_data.min().iloc[0],
+        '5%': metric_data.quantile(.05).iloc[0],
+        '25%': metric_data.quantile(.25).iloc[0],
+        '50%': metric_data.quantile(.50).iloc[0],
+        '75%': metric_data.quantile(.75).iloc[0],
+        '95%': metric_data.quantile(.95).iloc[0],
+        'max': metric_data.max().iloc[0],
+        'Shapiro-Wilk-test': f"Statistics={stat}, p={p}",
+        'non-normal_distribution': is_non_normal
+    }
+
+
+def refactoring_statistics(dataset, save_dir, levels, metrics, file_descriptor, refactorings=False):
+    statistics = pd.DataFrame(
+        columns=['refactoring_name', 'level', 'metric', 'descriptive_statistics', 'skew', 'Shapiro-Wilk-test',
+                 'non-normal_distribution'])
+
+    for level in levels:
+        statistics_path = f"{save_dir}{file_descriptor}{str(level)}_{dataset}.csv"
+        if not path.exists(statistics_path):
+            for metric in metrics:
+                if refactorings:
+                    for refactoring_name in LEVEL_MAP[level]:
+                        metric_data = retrieve_columns(get_level_refactorings(int(level), refactoring_name, dataset), [metric], samples=REFACTORING_SAMPLES)
+                        statistics = statistics.append(compute_statistics(metric_data, level, metric, extra_field=refactoring_name), ignore_index=True)
                 else:
-                    log(f"--Skipped box plot at {fig_path}, because it already exists.")
-        # for name, metrics in [("PROCESS_METRICS", PROCESS_METRICS_FIELDS)]:
-        #     metric_data = retrieve_columns(get_level_refactorings(int(level), "", dataset), metrics)
-        #     box_plot(metric_data.to_numpy(), metrics, f"{name}_{str(level)}", "Distribution/Refactoring")
-    statistics.to_csv(f"results/Distribution/Refactoring/refactoring_statistics_{dataset}.csv", index=False, header=True)
-
-
-def stable_statistics(dataset, save_dir):
-    statistics = pd.DataFrame(columns=['refactoring_name', 'level', 'metric', 'descriptive_statistics'])
-    for level in [Level.Class, Level.Method, Level.Variable, Level.Field]:
-        for k in [15, 20, 25, 30, 35, 40, 45, 50, 60, 70, 80, 90, 100]:
-            # for metric in LEVEL_METRIC_MAP[level]:
-            #     metric_data = retrieve_columns(get_level_stable(int(level), k, dataset), [metric])
-            #     new_statistics = {
-            #         'k': k,
-            #         'level': level,
-            #         'metric': metric,
-            #         'descriptive_statistics': f"{metric_data.describe()}"}
-            #     statistics.append(new_statistics, ignore_index=True)
-            # log(f"Collected all statistics for K={k} for the Level {level}")
-            # for name, metrics in LEVEL_METRIC_SET_MAP[level]:
-            for name, metrics in [("PROCESS_METRICS", PROCESS_METRICS_FIELDS)]:
-                title = f"{name}_{str(level)}_K={k}"
-                fig_path = f"results/{save_dir}/{title}_log_box_plot.svg"
-                if not path.exists(fig_path):
-                    metric_data = retrieve_columns(get_level_stable(int(level), k, dataset), metrics)
-                    box_plot(metric_data.to_numpy(), metrics, title, fig_path)
-                else:
-                    log(f"--Skipped box plot at {fig_path}, because it already exists.")
-    statistics.to_csv(f"results/Distribution/Stable/statistics_{dataset}.csv", index=False, header=True)
-
-
-def process_metrics(dataset, save_dir):
-    for k in [100, 20, 25, 30, 35, 40, 45, 50, 60, 70, 80, 90, 100]:
-        fig_path = f"results/{save_dir}/Process_Ownership_Metrics_K={k}_log_box_plot.svg"
-        if not path.exists(fig_path):
-            combined_stable_metrics = get_metrics_stable_all(k, dataset, PROCESS_METRICS_FIELDS)
-
-            # box plot
-            fig, ax = plt.subplots()
-            ax.set_title(f"Process- and ownership metrics for K={k}")
-            ax.boxplot(combined_stable_metrics.to_numpy(), showmeans=True, meanline=True, showfliers=False, notch=True, patch_artist=True, label=f"Stable K=15")
-
-            # plot refactorings
-            for level in [Level.Class, Level.Method, Level.Variable, Level.Field]:
-                refactoring_metrics_level = get_metrics_refactoring_level(level, dataset, PROCESS_METRICS_FIELDS)
-                ax.boxplot(refactoring_metrics_level, showmeans=True, meanline=True, showfliers=False, notch=True, patch_artist=True, label=f"{str(level)}")
-
-            plt.xticks(np.arange(1, len(PROCESS_METRICS_FIELDS) + 1), PROCESS_METRICS_FIELDS, rotation=30)
-            plt.yscale("log")
-            ax.set_yticks([0.1, 1, 10, 50, 100])
-            plt.xlabel("Metrics")
-            plt.legend()
-            plt.savefig(fig_path)
-            log(f"Saved box plot to {fig_path}")
-            plt.close(fig)
+                    for k in STABLE_Ks:
+                        metric_data = retrieve_columns(get_level_stable(int(level), k, dataset), metrics, STABLE_SAMPLES)
+                        statistics = statistics.append(compute_statistics(metric_data, level, metric, extra_field=f"{k}"), ignore_index=True)
+            statistics.to_csv(statistics_path, index=False, header=True)
+            log(f"Collected all statistics for {str(level)} and stored them at: {statistics_path}.")
         else:
-            log(f"--Skipped box plot at {fig_path}, because it already exists.")
+            statistics = statistics.append(pd.read_csv(statistics_path), ignore_index=True)
+
+    grouped = statistics.groupby(["metric", "level"], as_index=False).mean()
+    excel_path = f"{save_dir}{file_descriptor}_{dataset}.xlsx"
+    grouped.to_excel(excel_path, index=False)
+    return statistics
 
 
-def get_metrics_refactoring_level(level, dataset, metrics):
-    combined_refactoring_metrics = pd.DataFrame()
-    for refactoring_name in LEVEL_MAP[level]:
-        metric_data = retrieve_columns(get_level_refactorings(int(level), refactoring_name, dataset), metrics)
-        combined_refactoring_metrics = combined_refactoring_metrics.append(metric_data)
-    log(f"Extracted refactorings metrics of level {level}")
-    return combined_refactoring_metrics
+# def last_class_statistics(dataset, save_dir, levels, metrics, file_descriptor):
+#     statistics = pd.DataFrame(
+#         columns=['refactoring_name', 'level', 'metric', 'descriptive_statistics', 'skew', 'Shapiro-Wilk-test',
+#                  'non-normal_distribution'])
+#
+#     for level in levels:
+#         statistics_level = pd.DataFrame()
+#         statistics_path = f"{save_dir}{file_descriptor}{str(level)}_{dataset}.xlsx"
+#         if not path.exists(statistics_path):
+#             for metric in metrics:
+#                 for refactoring_name in LEVEL_MAP[level]:
+#                     metric_data = get_last_refactored_instance([metric], level, refactoring_name, REFACTORING_SAMPLES)
+#                     statistics_level = statistics_level.append(compute_statistics(metric_data, level, metric, extra_field=refactoring_name), ignore_index=True)
+#             statistics_level.to_excel(statistics_path, index=False, header=True)
+#             log(f"Collected all statistics for {str(level)} and stored them at: {statistics_path}.")
+#         else:
+#             statistics_level = pd.read_excel(statistics_path)
+#         statistics = statistics.append(statistics_level, ignore_index=True)
+#
+#     grouped = statistics.groupby(["metric", "level"], as_index=False).mean()
+#     excel_path = f"{save_dir}{file_descriptor}_{dataset}.xlsx"
+#     grouped.to_excel(excel_path, index=False)
+#     return statistics
 
 
-def get_metrics_stable_all(k, dataset, metrics):
-    combined_stable_metrics = pd.DataFrame()
-    for level in [Level.Class, Level.Method, Level.Variable, Level.Field]:
-        metric_data = retrieve_columns(get_level_stable(int(level), k, dataset), PROCESS_METRICS_FIELDS)
-        combined_stable_metrics = combined_stable_metrics.append(metric_data)
-        log(f"Extracted metrics of level {level} for K={k}")
-    return combined_stable_metrics
-
-
-def retrieve_columns(sql_query, columns):
-    # Hash the query
-    query_hash = hashlib.sha1(sql_query.encode()).hexdigest()
-
-    # Create the filepath
-    cache_dir = os.path.join(CACHE_DIR_PATH, "_cache")
-    file_path = os.path.join(cache_dir, f"{query_hash}.csv")
-    return pd.read_csv(file_path, usecols=columns).apply(pd.to_numeric, downcast='float')
-
-
-log_init(f"results/Distribution/feature_distribution_{datetime.datetime.now().strftime('%Y-%m-%d-%H-%M-%S')}.txt")
+SAVE_DIR = f"results/Distribution/Statistics/"
+log_init(f"{SAVE_DIR}feature_statistics_{datetime.datetime.now().strftime('%Y-%m-%d-%H-%M-%S')}.txt")
 start_time = time.time()
 
+Path(path.dirname(SAVE_DIR)).mkdir(parents=True, exist_ok=True)
 with pd.option_context('display.max_rows', None, 'display.max_columns', None):
-    # Path(path.dirname(f"results/Distribution/Refactoring/")).mkdir(parents=True, exist_ok=True)
-    # refactoring_statistics("", "Distribution/Refactoring")
-    Path(path.dirname(f"results/Distribution/Stable/")).mkdir(parents=True, exist_ok=True)
-    # stable_statistics("", "Distribution/Stable")
-    process_metrics("", "Distribution/Stable")
+    for metric_description, metrics in METRIC_SETS:
+        statistics = pd.DataFrame()
+        metrics_data = pd.DataFrame()
+        for metric in metrics:
+            metrics = get_last_refactored_instance_all([metric], REFACTORING_SAMPLES * 5)
+            statistics_metric = compute_statistics(metrics, Level.NONE, metric, extra_field="all")
+            statistics = statistics.append(statistics_metric, ignore_index=True)
+            metrics_data = metrics_data.append(metrics)
+            log(f"Extract {metric}")
 
+        if metric_description == "CLASS_METRICS_Fields":
+            yticks=[1, 2.5, 3.5, 5, 7.5, 10, 15, 20, 25, 35, 50, 100, 150, 250, 500, 650, 1000]
+        elif metric_description == "CLASS_ATTRIBUTES_QTY_Fields":
+            yticks=[0.5, 0.75, 1, 2.5, 3.5, 5, 7.5, 10, 15, 20, 25, 35, 50, 75, 100, 150, 200]
+        else:
+            yticks=[0.1, 0.15, 0.25, 0.5, 0.75, 1, 1.5, 2.0, 2.5, 3.5, 5, 6, 7.5, 9, 10, 15, 20]
+
+        fig_path = f"{SAVE_DIR}last_refactored_class_{metric_description}_plot.svg"
+        box_plot_seaborn_simple(metrics_data, f"{metric_description}", fig_path, "log", yticks=yticks)
+
+        grouped = statistics.groupby(["metric", "level"], as_index=False).mean()
+        excel_path = f"{SAVE_DIR}last_refactored_class_{metric_description}.xlsx"
+        grouped.to_excel(excel_path, index=False)
+        log(f"Stored statistics for {metric_description}")
+
+
+    for refactorings in [True, False]:
+        for metric_description, metrics in METRIC_SETS:
+            log(f"{refactorings} {metric_description}")
+            if refactorings:
+                refactoring_statistics("", SAVE_DIR, REFACTORING_LEVELS, metrics, f"refactoring_{metric_description}", refactorings)
+            else:
+                refactoring_statistics("", SAVE_DIR, STABLE_LEVELS, metrics, f"stable_{metric_description}", refactorings)
 
 log('Generating Statistics took %s seconds.' % (time.time() - start_time))
 log_close()
-close_connection()
 
 exit()
