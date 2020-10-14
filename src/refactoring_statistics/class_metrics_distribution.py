@@ -1,8 +1,7 @@
 from configs import Level, LEVEL_MAP
 from db.DBConnector import close_connection
-from refactoring_statistics.plot_utils import box_plot_seaborn, line_plot_seaborn
-from refactoring_statistics.query_utils import get_metrics_refactoring_level, get_metrics_stable_level, \
-    get_metrics_refactorings, get_metrics_stable_all
+from refactoring_statistics.plot_utils import box_plot_seaborn
+from refactoring_statistics.query_utils import get_metrics_refactoring_level, get_metrics_refactorings, retrieve_columns
 from utils.log import log_init, log_close, log
 import time
 import datetime
@@ -14,7 +13,7 @@ from os import path
 REFACTORING_SAMPLES = 50000
 REFACTORING_LEVELS = [Level.Class, Level.Method, Level.Variable, Level.Field, Level.Other]
 IMG_FORMAT = "svg"
-DATASET = "github"
+DATASET = ""
 
 # metrics
 CLASS_METRICS_Fields = ["classCbo",
@@ -37,10 +36,11 @@ CLASS_ATTRIBUTES_QTY_Fields = ["classUniqueWordsQty", "classNumberOfMethods", "c
 def metrics_refactorings_individual_levels(dataset, save_dir, yticks, metrics, title, file_descriptor):
     # refactoring metrics per level
     for level in REFACTORING_LEVELS:
-        fig_path_box = f"results/{save_dir}/{file_descriptor}_{str(level)}_log_box_plot_{dataset}.{IMG_FORMAT}"
+        fig_path_box = f"{save_dir}{file_descriptor}_{str(level)}_log_box_plot_{dataset}.{IMG_FORMAT}"
         if not path.exists(fig_path_box):
-            refactoring_metrics_level = get_metrics_refactorings(level, dataset, LEVEL_MAP[level], metrics, samples=REFACTORING_SAMPLES)
+            refactoring_metrics_level = get_metrics_refactorings(level, dataset, LEVEL_MAP[level], metrics, REFACTORING_SAMPLES)
             refactoring_metrics_level = pd.melt(refactoring_metrics_level, id_vars="refactoring", var_name="Metric", value_vars=metrics, value_name="values")
+
             refactoring_metrics_level['refactoring'] = refactoring_metrics_level['refactoring'].astype('category')
             refactoring_metrics_level['Metric'] = refactoring_metrics_level['Metric'].astype('category')
             box_plot_seaborn(refactoring_metrics_level, f"{title} {str(level)}", fig_path_box, scale="log", yticks=yticks, hue="refactoring")
@@ -50,7 +50,7 @@ def metrics_refactorings_individual_levels(dataset, save_dir, yticks, metrics, t
 
 # plot the metrics for each refactoring level
 def metrics_refactoring_levels(dataset, save_dir, yticks, metrics, title, file_descriptor):
-    fig_path_box = f"results/{save_dir}/{file_descriptor}_log_box_plot_{dataset}.{IMG_FORMAT}"
+    fig_path_box = f"{save_dir}{file_descriptor}_log_box_plot_{dataset}.{IMG_FORMAT}"
     if not path.exists(fig_path_box):
         combined_refactoring_metrics = pd.DataFrame()
         # refactoring metrics per level
@@ -73,29 +73,29 @@ start_time = time.time()
 
 # class metrics individual refactorings
 Path(path.dirname("results/Distribution/Class_Metrics/Refactorings/")).mkdir(parents=True, exist_ok=True)
-metrics_refactorings_individual_levels(DATASET, "Distribution/Class_Metrics/Refactorings", yticks=[1, 2.5, 3.5, 5, 7.5, 10, 15, 20, 25, 50, 75, 100, 125, 150, 200], metrics=CLASS_ATTRIBUTES_QTY_Fields,
+metrics_refactorings_individual_levels(DATASET, "results/Distribution/Class_Metrics/Refactorings/", yticks=[1, 2.5, 3.5, 5, 7.5, 10, 15, 20, 25, 50, 75, 100, 125, 150, 200], metrics=CLASS_ATTRIBUTES_QTY_Fields,
                                        title="Class Attributes: Refactorings",
                                        file_descriptor="Class_Attributes")
 
-metrics_refactorings_individual_levels(DATASET, "Distribution/Class_Metrics/Refactorings", yticks==[1, 2.5, 3.5, 5, 7.5, 10, 15, 20, 25, 50, 100, 150, 250, 350, 500, 750, 1000], metrics=CLASS_METRICS_Fields,
+metrics_refactorings_individual_levels(DATASET, "results/Distribution/Class_Metrics/Refactorings/", yticks=[1, 2.5, 3.5, 5, 7.5, 10, 15, 20, 25, 50, 100, 150, 250, 350, 500, 750, 1000], metrics=CLASS_METRICS_Fields,
                                        title="Class Metrics: Refactorings",
                                        file_descriptor="Class_Metrics")
 
-metrics_refactorings_individual_levels(DATASET, "Distribution/Class_Metrics/Refactorings", yticks=[10, 15, 20, 25, 50, 75, 90, 100, 125, 150, 200, 250, 350, 500, 650, 750, 1000, 1500], metrics=CLASS_LARGE_Fields,
+metrics_refactorings_individual_levels(DATASET, "results/Distribution/Class_Metrics/Refactorings/", yticks=[10, 15, 20, 25, 50, 75, 90, 100, 125, 150, 200, 250, 350, 500, 650, 750, 1000, 1500], metrics=CLASS_LARGE_Fields,
                                        title="Class Metrics Large: Refactorings",
                                        file_descriptor="Class_Metrics_Large")
 
 # class metrics refactoring levels
 Path(path.dirname("results/Distribution/Class_Metrics/Refactoring/")).mkdir(parents=True, exist_ok=True)
-metrics_refactoring_levels(DATASET, "Distribution/Class_Metrics/Refactoring", yticks=[1, 2.5, 3.5, 5, 7.5, 10, 15, 20, 25, 35, 50, 75, 100, 125, 150, 200], metrics=CLASS_ATTRIBUTES_QTY_Fields,
+metrics_refactoring_levels(DATASET, "results/Distribution/Class_Metrics/Refactoring/", yticks=[1, 2.5, 3.5, 5, 7.5, 10, 15, 20, 25, 35, 50, 75, 100, 125, 150, 200], metrics=CLASS_ATTRIBUTES_QTY_Fields,
                            title="Class Attributes: Refactoring Levels",
                            file_descriptor="Class_Attributes_Refactoring")
 
-metrics_refactoring_levels(DATASET, "Distribution/Class_Metrics/Refactoring", yticks=[1, 2.5, 3.5, 5, 7.5, 10, 15, 20, 25, 50, 100, 150, 250, 350, 500, 750, 1000], metrics=CLASS_METRICS_Fields,
+metrics_refactoring_levels(DATASET, "results/Distribution/Class_Metrics/Refactoring/", yticks=[1, 2.5, 3.5, 5, 7.5, 10, 15, 20, 25, 50, 100, 150, 250, 350, 500, 750, 1000], metrics=CLASS_METRICS_Fields,
                            title="Class Metrics: Refactoring Levels",
                            file_descriptor="Class_Metrics_Refactoring")
 
-metrics_refactoring_levels(DATASET, "Distribution/Class_Metrics/Refactoring", yticks=[1, 2.5, 3.5, 5, 7.5, 10, 15, 20, 25, 50, 75, 90, 100, 125, 150, 200, 250, 350, 500, 650, 750], metrics=CLASS_LARGE_Fields,
+metrics_refactoring_levels(DATASET, "results/Distribution/Class_Metrics/Refactoring/", yticks=[1, 2.5, 3.5, 5, 7.5, 10, 15, 20, 25, 50, 75, 90, 100, 125, 150, 200, 250, 350, 500, 650, 750], metrics=CLASS_LARGE_Fields,
                                        title="Class Metrics Large: Levels",
                                        file_descriptor="Class_Metrics_Large_Refactoring")
 

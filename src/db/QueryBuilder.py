@@ -142,7 +142,7 @@ def get_refactoring_levels_counts(dataset="") -> str:
            + " group by `level`, refactoring order by count(*) desc"
 
 
-def get_level_refactorings(level: int, m_refactoring: str, dataset: str = "") -> str:
+def get_level_refactorings(level: int, m_refactoring: str, dataset: str = "", conditions: str = "") -> str:
     """
     Get all refactoring instances with the given refactoring type and metrics in regard to the level
 
@@ -150,6 +150,8 @@ def get_level_refactorings(level: int, m_refactoring: str, dataset: str = "") ->
         level (int):                    the refactoring instances are filtered for this level
         m_refactoring (str) (optional): filter for a specific refactoring type, e.g. "Push Down Attribute"
         dataset (str) (optional):       filter the project dataset for this
+        conditions (str) (optional):    additional sql conditions for this refactoring, e.g. (commitDate BETWEEN A and B).
+                                        DON'T add filter for the level or test; this is already done.
     """
     # only select valid refactorings from the database, if refactorings are selected
     refactoring_condition: str = f"{refactoringCommits}.level = {str(level)} AND {valid_refactorings_filter(refactoringCommits)} AND {file_type_filter(refactoringCommits)}"
@@ -157,28 +159,10 @@ def get_level_refactorings(level: int, m_refactoring: str, dataset: str = "") ->
     # only select the specified refactoring type from the database
     if m_refactoring != "":
         refactoring_condition += f" AND {refactoringCommits}.refactoring = \"{m_refactoring}\""
+    if len(conditions) > 0:
+        refactoring_condition += f" AND {conditions}"
     return get_instance_fields(refactoringCommits, [(refactoringCommits, []), (commitMetaData, [])] + get_metrics_level(level),
                                refactoring_condition, dataset, "", get_instance_id=True)
-
-
-def get_level_stable(level: int, commit_threshold: int, dataset: str = "", conditions: str = "") -> str:
-    """
-    Get all stable instances with the given level and the corresponding metrics
-
-    Parameters:
-        level (int):                    get the stable instances for this level
-        commit_threshold (int):    filter for this specific commit threshold, specifying the 'stability' of the instance
-        dataset (str) (optional):       filter the project dataset for this
-        conditions (str) (optional):    additional sql conditions for this refactoring, e.g. (commitDate BETWEEN A and B).
-                                        DON'T add filter for the level or test; this is already done.
-    """
-    # only select valid refactorings from the database, if refactorings are selected
-    stable_condition: str = f"{stableCommits}.commitThreshold = {commit_threshold} AND {__stable_level_filter(level)} AND {file_type_filter(stableCommits)}"
-
-    if len(conditions) > 0:
-        stable_condition += f" AND {conditions}"
-    return get_instance_fields(stableCommits, [(stableCommits, []), (commitMetaData, [])] + get_metrics_level(level),
-                               stable_condition, dataset, "", get_instance_id=True)
 
 
 def get_level_stable(level: int, commit_threshold: int, dataset: str = "", conditions: str = "") -> str:

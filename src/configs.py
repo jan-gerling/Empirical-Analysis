@@ -165,7 +165,8 @@ PROCESS_METRICS_FIELDS = ["authorOwnership",
                           "qtyMajorAuthors",
                           "qtyMinorAuthors",
                           "qtyOfAuthors",
-                          "qtyOfCommits"]
+                          "qtyOfCommits",
+                          "refactoringsInvolved"]
 COMMIT_METADATA_FIELDS = ["commitDate",
                           "commitId",
                           "commitMessage",

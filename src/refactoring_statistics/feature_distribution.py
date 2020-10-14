@@ -1,8 +1,7 @@
 from configs import Level, LEVEL_MAP, PROCESS_METRICS_FIELDS
 from db.QueryBuilder import get_level_refactorings, get_level_stable
-from refactoring_statistics.plot_utils import plot_histogram, box_plot_seaborn, box_plot_seaborn_simple
-from refactoring_statistics.query_utils import retrieve_columns, get_last_refactored_instance, \
-    get_last_refactored_instance_all
+from refactoring_statistics.plot_utils import  box_plot_seaborn_simple
+from refactoring_statistics.query_utils import retrieve_columns, get_last_refactored_instance_all
 from utils.log import log_init, log_close, log
 import time
 import datetime
@@ -87,62 +86,36 @@ def refactoring_statistics(dataset, save_dir, levels, metrics, file_descriptor, 
     return statistics
 
 
-# def last_class_statistics(dataset, save_dir, levels, metrics, file_descriptor):
-#     statistics = pd.DataFrame(
-#         columns=['refactoring_name', 'level', 'metric', 'descriptive_statistics', 'skew', 'Shapiro-Wilk-test',
-#                  'non-normal_distribution'])
-#
-#     for level in levels:
-#         statistics_level = pd.DataFrame()
-#         statistics_path = f"{save_dir}{file_descriptor}{str(level)}_{dataset}.xlsx"
-#         if not path.exists(statistics_path):
-#             for metric in metrics:
-#                 for refactoring_name in LEVEL_MAP[level]:
-#                     metric_data = get_last_refactored_instance([metric], level, refactoring_name, REFACTORING_SAMPLES)
-#                     statistics_level = statistics_level.append(compute_statistics(metric_data, level, metric, extra_field=refactoring_name), ignore_index=True)
-#             statistics_level.to_excel(statistics_path, index=False, header=True)
-#             log(f"Collected all statistics for {str(level)} and stored them at: {statistics_path}.")
-#         else:
-#             statistics_level = pd.read_excel(statistics_path)
-#         statistics = statistics.append(statistics_level, ignore_index=True)
-#
-#     grouped = statistics.groupby(["metric", "level"], as_index=False).mean()
-#     excel_path = f"{save_dir}{file_descriptor}_{dataset}.xlsx"
-#     grouped.to_excel(excel_path, index=False)
-#     return statistics
-
-
 SAVE_DIR = f"results/Distribution/Statistics/"
 log_init(f"{SAVE_DIR}feature_statistics_{datetime.datetime.now().strftime('%Y-%m-%d-%H-%M-%S')}.txt")
 start_time = time.time()
 
 Path(path.dirname(SAVE_DIR)).mkdir(parents=True, exist_ok=True)
 with pd.option_context('display.max_rows', None, 'display.max_columns', None):
-    for metric_description, metrics in METRIC_SETS:
-        statistics = pd.DataFrame()
-        metrics_data = pd.DataFrame()
-        for metric in metrics:
-            metrics = get_last_refactored_instance_all([metric], REFACTORING_SAMPLES * 5)
-            statistics_metric = compute_statistics(metrics, Level.NONE, metric, extra_field="all")
-            statistics = statistics.append(statistics_metric, ignore_index=True)
-            metrics_data = metrics_data.append(metrics)
-            log(f"Extract {metric}")
-
-        if metric_description == "CLASS_METRICS_Fields":
-            yticks=[1, 2.5, 3.5, 5, 7.5, 10, 15, 20, 25, 35, 50, 100, 150, 250, 500, 650, 1000]
-        elif metric_description == "CLASS_ATTRIBUTES_QTY_Fields":
-            yticks=[0.5, 0.75, 1, 2.5, 3.5, 5, 7.5, 10, 15, 20, 25, 35, 50, 75, 100, 150, 200]
-        else:
-            yticks=[0.1, 0.15, 0.25, 0.5, 0.75, 1, 1.5, 2.0, 2.5, 3.5, 5, 6, 7.5, 9, 10, 15, 20]
-
-        fig_path = f"{SAVE_DIR}last_refactored_class_{metric_description}_plot.svg"
-        box_plot_seaborn_simple(metrics_data, f"{metric_description}", fig_path, "log", yticks=yticks)
-
-        grouped = statistics.groupby(["metric", "level"], as_index=False).mean()
-        excel_path = f"{SAVE_DIR}last_refactored_class_{metric_description}.xlsx"
-        grouped.to_excel(excel_path, index=False)
-        log(f"Stored statistics for {metric_description}")
-
+    # for metric_description, metrics in METRIC_SETS:
+    #     statistics = pd.DataFrame()
+    #     metrics_data = pd.DataFrame()
+    #     for metric in metrics:
+    #         metrics = get_last_refactored_instance_all([metric], REFACTORING_SAMPLES * 5)
+    #         statistics_metric = compute_statistics(metrics, Level.NONE, metric, extra_field="all")
+    #         statistics = statistics.append(statistics_metric, ignore_index=True)
+    #         metrics_data = metrics_data.append(metrics)
+    #         log(f"Extract {metric}")
+    #
+    #     if metric_description == "CLASS_METRICS_Fields":
+    #         yticks=[1, 2.5, 3.5, 5, 7.5, 10, 15, 20, 25, 35, 50, 100, 150, 250, 500, 650, 1000]
+    #     elif metric_description == "CLASS_ATTRIBUTES_QTY_Fields":
+    #         yticks=[0.5, 0.75, 1, 2.5, 3.5, 5, 7.5, 10, 15, 20, 25, 35, 50, 75, 100, 150, 200]
+    #     else:
+    #         yticks=[0.1, 0.15, 0.25, 0.5, 0.75, 1, 1.5, 2.0, 2.5, 3.5, 5, 6, 7.5, 9, 10, 15, 20]
+    #
+    #     fig_path = f"{SAVE_DIR}last_refactored_class_{metric_description}_plot.svg"
+    #     box_plot_seaborn_simple(metrics_data, f"{metric_description}", fig_path, "log", yticks=yticks)
+    #
+    #     grouped = statistics.groupby(["metric", "level"], as_index=False).mean()
+    #     excel_path = f"{SAVE_DIR}last_refactored_class_{metric_description}.xlsx"
+    #     grouped.to_excel(excel_path, index=False)
+    #     log(f"Stored statistics for {metric_description}")
 
     for refactorings in [True, False]:
         for metric_description, metrics in METRIC_SETS:

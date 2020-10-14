@@ -23,7 +23,7 @@ def get_frequency_data_refactorings(level, metric):
     data_path = f"{SAVE_DIR}refactoring_{level.name}_{metric}.csv"
     if not path.exists(data_path):
         refactorings = LEVEL_MAP[level]
-        data = get_metrics_refactorings(level, "", refactorings, METRICS, REFACTORING_SAMPLES)
+        data = get_metrics_refactorings(level, "", refactorings, METRICS)
 
         frequency_data = pd.DataFrame()
         for refactoring_name in refactorings:

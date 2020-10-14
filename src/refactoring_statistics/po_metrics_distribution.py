@@ -35,7 +35,7 @@ def metrics_refactorings_individual_levels(dataset, save_dir, yticks, metrics, t
     for level in REFACTORING_LEVELS:
         fig_path_box = f"results/{save_dir}/{file_descriptor}_{str(level)}_log_box_plot_{dataset}.{IMG_FORMAT}"
         if not path.exists(fig_path_box):
-            refactoring_metrics_level = get_metrics_refactorings(level, dataset, LEVEL_MAP[level], metrics, samples=REFACTORING_SAMPLES)
+            refactoring_metrics_level = get_metrics_refactorings(level, dataset, LEVEL_MAP[level], metrics)
             refactoring_metrics_level = pd.melt(refactoring_metrics_level, id_vars="refactoring", var_name="Metric", value_vars=metrics, value_name="values")
             refactoring_metrics_level['refactoring'] = refactoring_metrics_level['refactoring'].astype('category')
             refactoring_metrics_level['Metric'] = refactoring_metrics_level['Metric'].astype('category')
